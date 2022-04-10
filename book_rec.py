@@ -12,7 +12,7 @@ books = pd.read_csv('BX-Books.csv',  encoding='cp1251', sep=';', on_bad_lines='s
 def main(book_name, book_author):
     #users_ratigs = pd.merge(ratings, users, on=['User-ID'])
     dataset = pd.merge(ratings, books, on=['ISBN'])
-    dataset_lowercase=dataset.apply(lambda x: x.str.lower() if(x.dtype == 'object') else x)
+    dataset_lowercase = dataset.apply(lambda x: x.str.lower() if(x.dtype == 'object') else x)
 
     #book_name = "the fellowship of the ring (the lord of the rings, part 1)"
     #book_author = "tolkien"
