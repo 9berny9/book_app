@@ -77,6 +77,4 @@ def main(book_name, book_author):
     #print("Average rating of LOR:", ratings_data_raw[ratings_data_raw['Book-Title']=='the fellowship of the ring (the lord of the rings, part 1'].groupby(ratings_data_raw['Book-Title']).mean()))
     #rslt = result_list[0]
     #print(rslt)
-    return result_list[0]
-
-main("seventeen times as high as the moon: short stories", "oliver")
+    return result_list
