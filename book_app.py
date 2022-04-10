@@ -39,8 +39,10 @@ st.write(f'You selected: {book_name}')
 short_author_name = book_author.lower().split()[-1]
 
 if st.button("Get recommendations"):
-    st.write(book_rec.main(book_name.lower(), short_author_name))
+    result = book_rec.main(book_name.lower(), short_author_name)
+    if len(result[0]) == 0:
+        st.write("Sorry I don't have enough data for this book")
+    else:
+        st.write(result[0])
 
 
-
-#book_rec.main(book_name, book_title)

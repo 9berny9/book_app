@@ -31,7 +31,6 @@ def main(book_name, book_author):
     #select only books which have actually higher number of ratings than threshold
     books_to_compare = number_of_rating_per_book['Book-Title'][number_of_rating_per_book['User-ID'] >= 8]
     books_to_compare = books_to_compare.tolist()
-    print(books_to_compare)
 
     ratings_data_raw = books_of_author_readers[['User-ID', 'Book-Rating', 'Book-Title']][books_of_author_readers['Book-Title'].isin(books_to_compare)]
 
