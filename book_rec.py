@@ -2,7 +2,7 @@
 import pandas as pd
 import numpy as np
 
-# load ratings
+## load ratings
 ratings = pd.read_csv('BX-Book-Ratings.csv', encoding='cp1251', sep=';')
 ratings = ratings[ratings['Book-Rating'] != 0]
 

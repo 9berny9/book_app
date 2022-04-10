@@ -43,6 +43,6 @@ if st.button("Get recommendations"):
     if len(result[0]) == 0:
         st.write("Sorry I don't have enough data for this book")
     else:
-        st.write(result)
+        st.write(result[0])
 
 
