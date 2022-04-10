@@ -37,7 +37,7 @@ book_name = st.selectbox(f'Select your favorite book from {book_author}', book_t
 st.write(f'You selected: {book_name}')
 
 if st.button("Get recommendations"):
-    st.write(book_rec.main("the fellowship of the ring (the lord of the rings, part 1)", 'tolkien'))
+    st.write(book_rec.main("the fellowship of the ring (the lord of the rings, part 1)", "tolkien"))
 
 
 
