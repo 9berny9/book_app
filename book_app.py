@@ -36,5 +36,9 @@ book_title = book_rec.books.loc[book_rec.books['Book-Author'] == book_author]['B
 book_name = st.selectbox(f'Select your favorite book from {book_author}', book_title)
 st.write(f'You selected: {book_name}')
 
+if st.button("Get recommendations"):
+    st.write(book_rec.main("the fellowship of the ring (the lord of the rings, part 1)", 'tolkien'))
+
+
 
 #book_rec.main(book_name, book_title)
