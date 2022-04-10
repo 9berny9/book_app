@@ -31,6 +31,7 @@ def main(book_name, book_author):
     #select only books which have actually higher number of ratings than threshold
     books_to_compare = number_of_rating_per_book['Book-Title'][number_of_rating_per_book['User-ID'] >= 8]
     books_to_compare = books_to_compare.tolist()
+    print(books_to_compare)
 
     ratings_data_raw = books_of_author_readers[['User-ID', 'Book-Rating', 'Book-Title']][books_of_author_readers['Book-Title'].isin(books_to_compare)]
 
@@ -47,8 +48,9 @@ def main(book_name, book_author):
     worst_list = []
 
     #Take out the book from correlation dataframe
-    dataset_of_other_author_books = dataset_for_corr.copy(deep=False)
-    dataset_of_other_author_books.drop(book_name, axis=1, inplace=True)
+    dataset_corr_without_your_book = dataset_for_corr.copy(deep=False)
+    if book_name in dataset_corr_without_your_book:
+        dataset_corr_without_your_book.drop(book_name, axis=1, inplace=True)
 
     # empty lists
     book_titles = []
@@ -56,9 +58,9 @@ def main(book_name, book_author):
     avgrating = []
 
     # corr computation
-    for book_title in list(dataset_of_other_author_books.columns.values):
+    for book_title in list(dataset_corr_without_your_book.columns.values):
         book_titles.append(book_title)
-        correlations.append(dataset_for_corr[book_name].corr(dataset_of_other_author_books[book_title]))
+        correlations.append(dataset_for_corr[book_name].corr(dataset_corr_without_your_book[book_title]))
         tab=(ratings_data_raw[ratings_data_raw['Book-Title'] == book_title].groupby(ratings_data_raw['Book-Title']).mean())
         avgrating.append(tab['Book-Rating'].min())
     # final dataframe of all correlation of each book
@@ -77,4 +79,4 @@ def main(book_name, book_author):
     #print(rslt)
     return result_list[0]
 
-#main("the fellowship of the ring (the lord of the rings, part 1)", "tolkien")
+main("seventeen times as high as the moon: short stories", "oliver")
