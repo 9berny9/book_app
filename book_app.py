@@ -3,6 +3,7 @@ import numpy as np
 import streamlit as st
 import book_rec
 import functions as fnc
+import re
 
 st.write("""
 # bookREC
@@ -20,8 +21,10 @@ if user_name:
 
         if book_author:
             st.write(f'You selected: {book_author}')
-            books_finding = fnc.dataset_lowercase[fnc.dataset_lowercase['Book-Author'].str.contains(book_author_find, case=False, na=True)]
-            books_finding = pd.unique(books_finding.sort_values(by="Book-Title"))
+            books_finding = fnc.dataset_base['Book-Title'][fnc.dataset_base['Book-Author']
+                .str.contains(book_author_find, case=False, na=True, flags=re.IGNORECASE, regex=False)]
+            books_finding = books_finding.sort_values().dropna()
+            books_finding = list(books_finding.unique())
 
             # st.write(f'You selected: {book_author}')
 

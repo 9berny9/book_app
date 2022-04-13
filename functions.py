@@ -4,14 +4,15 @@ dataset_base = bc.dataset_merge()
 dataset_lowercase = bc.lowercase(dataset_base)
 
 
-def unique_list(dataset_base):
-    df = dataset_base['Book-Author'].sort_values().dropna()
+def unique_list(data):
+    df = data['Book-Author'].sort_values().dropna()
     df = list(df.unique())
     df.insert(0, '')
     return df
 
 
 df_authors = unique_list(dataset_base)
+print(dataset_base)
 
 genres = ["Art", "Business", "Chick-Lit", "Children's", "Christian", "Classics", "Comendy",
           "Comics", "Contemporary", "Cookbooks", "Crime", "Ebooks", "Fantasy", "Fiction", "Graphic Novels",
