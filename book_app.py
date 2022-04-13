@@ -31,7 +31,8 @@ if user_name:
 
         if book_author:
             st.write(f'You selected: {book_author}')
-            books_finding = book_rec.books[book_rec.books['Book-Author'].str.contains(book_author, case=False, na=True)]
+            books_data = book_rec.load_data(path='BX-Books.csv')
+            books_finding = books_data[books_data['Book-Author'].str.contains(book_author, case=False, na=True)]
 
         #book_author = st.selectbox('Select your favorite book author', books_finding["Book-Author"])
         #st.write(f'You selected: {book_author}')
@@ -40,12 +41,16 @@ if user_name:
         #book_title = book_rec.books.loc[book_rec.books['Book-Author'] == book_author]['Book-Title']
             book_name = st.selectbox(f'Select your favorite book from {book_author}', books_finding['Book-Title'])
             st.write(f'You selected: {book_name}')
+            book_name = book_name.lower()
+            more_books = [book_name]
+            book_author = book_author.lower()
+            print(book_name)
+            print(more_books)
+            print(book_author)
+
 
             if st.button("Get recommendations"):
-                result = book_rec.main(book_name.lower(), book_author)
-                if len(result[0]) == 0:
-                    st.write("Sorry I don't have enough data for this book")
-                else:
-                    st.write(result[0])
+                result = book_rec.main(book_name, book_author, more_books)
+                st.write(result)
 
 

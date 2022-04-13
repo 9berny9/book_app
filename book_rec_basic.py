@@ -59,6 +59,7 @@ for LoR_book in LoR_list:
     for book_title in list(dataset_of_other_books.columns.values):
         book_titles.append(book_title)
         correlations.append(dataset_for_corr[LoR_book].corr(dataset_of_other_books[book_title]))
+        print(correlations)
         tab=(ratings_data_raw[ratings_data_raw['Book-Title']==book_title].groupby(ratings_data_raw['Book-Title']).mean())
         avgrating.append(tab['Book-Rating'].min())
     # final dataframe of all correlation of each book   
