@@ -57,7 +57,9 @@ def all_correlations(books_choice, dataset_for_corr, ratings_data_raw_nodup):
     for book in books_choice:
         # Take out the author's selected book from correlation dataframe
         dataset_of_other_books = dataset_for_corr.copy(deep=False)
-        dataset_of_other_books.drop([book], axis=1, inplace=True)
+
+        if book in dataset_for_corr:
+            dataset_of_other_books.drop([book], axis=1, inplace=True)
 
         corr_fellowship = correlation_by_book(dataset_of_other_books, dataset_for_corr, book, ratings_data_raw_nodup)
 
@@ -88,7 +90,6 @@ def correlation_by_book(dataset_of_other_books, dataset_for_corr, book, ratings_
 
 def main(dataset_lowercase, book_name, book_author, books_choice):
     author_readers = author_find(dataset_lowercase, book_name, book_author)
-
     # final dataset with users, books and ratings
     books_of_author_readers = dataset_lowercase[(dataset_lowercase['User-ID'].isin(author_readers))]
     ratings_data_raw = ratings_data(books_of_author_readers)
@@ -100,7 +101,5 @@ def main(dataset_lowercase, book_name, book_author, books_choice):
     # top_books = result_list[0][0]
     # worst_books = result_list[1][0]
 
-    book_rating = ratings_data_raw["Book-Rating"][ratings_data_raw['Book-Title'] == book_name].groupby(
-        ratings_data_raw['Book-Title']).mean()
-    print(book_rating)
+    #book_rating = ratings_data_raw["Book-Rating"][ratings_data_raw['Book-Title'] == book_name].groupby(ratings_data_raw['Book-Title']).mean()
     return result_list
