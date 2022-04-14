@@ -3,23 +3,25 @@
 import pandas as pd
 import numpy as np
 
+
 # load ratings
-ratings = pd.read_csv('Downloads/BX-Book-Ratings.csv', encoding='cp1251', sep=';')
+ratings = pd.read_csv('BX-Book-Ratings.csv', encoding='cp1251', sep=';')
 ratings = ratings[ratings['Book-Rating']!=0]
 
 # load books
-books = pd.read_csv('Downloads/BX-Books.csv',  encoding='cp1251', sep=';',error_bad_lines=False)
+books = pd.read_csv('BX-Books.csv',  encoding='cp1251', sep=';',on_bad_lines='skip', low_memory=False)
 
 #users_ratigs = pd.merge(ratings, users, on=['User-ID'])
 dataset = pd.merge(ratings, books, on=['ISBN'])
 dataset_lowercase=dataset.apply(lambda x: x.str.lower() if(x.dtype == 'object') else x)
 
-tolkien_readers = dataset_lowercase['User-ID'][(dataset_lowercase['Book-Title']=='the fellowship of the ring (the lord of the rings, part 1)') & (dataset_lowercase['Book-Author'].str.contains("tolkien"))]
+tolkien_readers = dataset_lowercase['User-ID'][(dataset_lowercase['Book-Title']=='wild animus') & (dataset_lowercase['Book-Author'].str.contains("shapero"))]
 tolkien_readers = tolkien_readers.tolist()
 tolkien_readers = np.unique(tolkien_readers)
 
 # final dataset
 books_of_tolkien_readers = dataset_lowercase[(dataset_lowercase['User-ID'].isin(tolkien_readers))]
+
 
 # Number of ratings per other books in dataset
 number_of_rating_per_book = books_of_tolkien_readers.groupby(['Book-Title']).agg('count').reset_index()
@@ -38,14 +40,19 @@ ratings_data_raw_nodup = ratings_data_raw_nodup.to_frame().reset_index()
 
 dataset_for_corr = ratings_data_raw_nodup.pivot(index='User-ID', columns='Book-Title', values='Book-Rating')
 
-LoR_list = ['the fellowship of the ring (the lord of the rings, part 1)']
+
+
+LoR_list = ['wild animus']
 
 result_list = []
 worst_list = []
 
+print(dataset_for_corr)
+
 # for each of the trilogy book compute:
 for LoR_book in LoR_list:
-    
+
+
     #Take out the Lord of the Rings selected book from correlation dataframe
     dataset_of_other_books = dataset_for_corr.copy(deep=False)
     dataset_of_other_books.drop([LoR_book], axis=1, inplace=True)
@@ -59,7 +66,6 @@ for LoR_book in LoR_list:
     for book_title in list(dataset_of_other_books.columns.values):
         book_titles.append(book_title)
         correlations.append(dataset_for_corr[LoR_book].corr(dataset_of_other_books[book_title]))
-        print(correlations)
         tab=(ratings_data_raw[ratings_data_raw['Book-Title']==book_title].groupby(ratings_data_raw['Book-Title']).mean())
         avgrating.append(tab['Book-Rating'].min())
     # final dataframe of all correlation of each book   
@@ -75,3 +81,4 @@ for LoR_book in LoR_list:
 print("Correlation for book:", LoR_list[0])
 #print("Average rating of LOR:", ratings_data_raw[ratings_data_raw['Book-Title']=='the fellowship of the ring (the lord of the rings, part 1'].groupby(ratings_data_raw['Book-Title']).mean()))
 rslt = result_list[0]
+print(rslt)
