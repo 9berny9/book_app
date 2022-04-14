@@ -7,6 +7,11 @@ def dataset_merge():
     books = pd.read_csv('BX-Books.csv', encoding='cp1251', sep=';', on_bad_lines='skip', low_memory=False)
     ratings = pd.read_csv('BX-Book-Ratings.csv', encoding='cp1251', sep=';', on_bad_lines='skip', low_memory=False)
     ratings = ratings[ratings['Book-Rating'] != 0]
+
+    #zkouska
+    ratings = ratings.groupby(['ISBN']).count()
+    ratings = ratings.reset_index()
+    ratings = ratings['ISBN'][ratings['User-ID'] > 5]
     dataset = pd.merge(ratings, books, on=['ISBN'])
     return dataset
 

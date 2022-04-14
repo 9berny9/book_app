@@ -10,12 +10,17 @@ def unique_list(data, column):
     return relevant_data
 
 
+relevant_data = ratings.groupby(['ISBN']).count()
+relevant_data = relevant_data.reset_index()
+relevant_data = relevant_data['ISBN'][relevant_data['User-ID'] > 5]
+# ted mam knizky, ktere byly hodnoceny aspon 5x - > spojim je s knizkami vsemi
+final = pd.merge(relevant_data, books, on=['ISBN'], how='inner')
+
+
+
 dataset_base = bc.dataset_merge()
 dataset_lowercase = bc.lowercase(dataset_base)
 dataset_authors = unique_list(dataset_base, 'Book-Author')
-
-#search_authors = get_search(dataset_relevant, column='Book-Author')
-#search_books = get_search(dataset_relevant, column='Book-Title')
 
 genres = ["Art", "Business", "Chick-Lit", "Children's", "Christian", "Classics", "Comendy",
           "Comics", "Contemporary", "Cookbooks", "Crime", "Ebooks", "Fantasy", "Fiction", "Graphic Novels",
