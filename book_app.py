@@ -29,7 +29,6 @@ def main():
             book_author = st.selectbox(f"Select your favorite author:", br.select_authors)
 
             if book_author:
-                st.write(f'You selected: {book_author}')
                 books_finding = br.books_relevant['Book-Title'][
                     br.books_relevant['Book-Author'].str.contains(book_author.lower(), case=False, na=True,
                                                                   flags=re.IGNORECASE, regex=False)]
@@ -52,10 +51,6 @@ def main():
                         st.write(result[0][0])
                     elif worst:
                         st.write(result[1][0])
-
-
-
-
 
 
 if __name__ == '__main__':
