@@ -1,6 +1,7 @@
 # import libraries
 from bs4 import BeautifulSoup as bs
 import requests
+import codecs
 
 
 def get_search(search_term):
@@ -37,22 +38,33 @@ def get_title(book):
     return book_title
 
 
-def get_href(book):
-    book_href = book.find('a')['href']
+def get_href(soup):
+    book_href = soup.find('a')['href']
     return book_href
 
+def get_description(soup):
+    book_desc = soup.find_all('div', {'class':'a-expander-content a-expander-partial-collapse-content a-expander-content-expanded'})
+    return book_desc[0].get_text()
 
-search_book = get_search('j k tolkien')
+
+search_book = get_search('tolkien')
 search_page_soup = get_soup(search_book)
 search_book = find_book(search_page_soup)
 search_title = get_title(search_book)
 search_href = get_href(search_book)
 book_url = get_book_url(search_href)
-search_book_soup = get_soup(book_url)
+book_soup = get_soup(book_url)
+book_desc = get_description(book_soup)
 
 
-print(search_title)
-print(search_href)
-print(book_url)
+
+#bookDescription_feature_div > div > div.a-expander-content.a-expander-partial-collapse-content
+#f = codecs.open("amazon.html", 'r', 'utf-8')
+
+#document = bs(f.read(), 'html.parser')
+#desc = get_description(document)
+#print(desc)
+
+
 
 

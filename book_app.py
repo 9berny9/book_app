@@ -1,6 +1,7 @@
 import streamlit as st
 import book_rec as br
 import re
+import prices_scraper as ps
 
 st.write("""
 # bookREC
@@ -22,6 +23,9 @@ if user_name:
 
             book_name = st.selectbox(f'Select your favorite book from {book_author}', books_list)
             st.write(f'You selected: {book_name} and users rating is: {"book_rating"}')
+
+            if st.button("Get description"):
+                st.write(ps.book_desc)
 
             if st.button("Get recommendations"):
                 result = br.main(br.dataset_lowercase, book_name.lower(), book_author.lower(), [book_name.lower()])

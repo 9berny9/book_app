@@ -27,7 +27,7 @@ def get_data(data, column):
     return relevant_data
 
 def get_genres():
-    genres = ["Art", "Business", "Chick-Lit", "Children's", "Christian", "Classics", "Comendy",
+    genres_list = ["Art", "Business", "Chick-Lit", "Children's", "Christian", "Classics", "Comendy",
               "Comics", "Contemporary", "Cookbooks", "Crime", "Ebooks", "Fantasy", "Fiction", "Graphic Novels",
               "Historical Fiction",
               "History", "Horror", "LGBT", "Manga", "Memoir", "Music", "Mystery", "Nonfiction", "Paranormal",
@@ -37,7 +37,7 @@ def get_genres():
               "Spirituality",
               "Sports",
               "Thriller", "Travel", "Young Adult"]
-    return genres
+    return genres_list
 
 def lowercase(dataset_merge):
     """
