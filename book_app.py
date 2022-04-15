@@ -1,6 +1,7 @@
 import streamlit as st
 import book_rec as br
 import re
+import description_scraper as ds
 
 with open('style.css') as f:
     st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
@@ -36,19 +37,24 @@ def main():
 
                 book_name = st.selectbox(f'Select your favorite book from {book_author}', books_list)
                 if book_name:
-                    st.write(f'{book_name} rating is: {round(br.get_book_rating(br.dataset_base, book_name), 1)}')
+                    st.markdown(f'''## {book_name} ''')
+                    col1, col2 = st.columns(2)
+                    col1.markdown(f'''### {book_author} ''')
+                    col2.markdown(f'''#### {round(br.get_book_rating(br.dataset_base, book_name), 1)}/10''')
+                    ## rating is: {round(br.get_book_rating(br.dataset_base, book_name), 1)}''')
+                    st.write(f'''{ds.main(book_name)}''')
+                    box1, box2 = st.columns(2)
+                    result = br.main(br.dataset_lowercase, book_name.lower(), book_author.lower(),
+                                     [book_name.lower()])
+                    best = box1.button('Best recommendations')
+                    worst = box2.button('Worst recommendations')
+                    if best:
+                        st.write(result[0][0])
+                    elif worst:
+                        st.write(result[1][0])
 
-                    if st.button("Get recommendations"):
-                        result = br.main(br.dataset_lowercase, book_name.lower(), book_author.lower(),
-                                         [book_name.lower()])
-                        best_books = result[0][0]
-                        worst_books = result[1][0]
-                        print(best_books)
-                        print(worst_books)
-                        box1, box2, box3 = st.columns(3)
-                        box1.radio('b','c')
-                        box2.radio('a','d')
-                        box3.radio('v','g')
+
+
 
 
 
