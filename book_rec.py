@@ -5,18 +5,24 @@ import numpy as np
 
 def dataset_merge():
     books = pd.read_csv('csv_files/BX-Books.csv', encoding='cp1251', sep=';', on_bad_lines='skip', low_memory=False)
-    ratings = pd.read_csv('csv_files/BX-Book-Ratings.csv', encoding='cp1251', sep=';', on_bad_lines='skip', low_memory=False)
+    ratings = pd.read_csv('csv_files/BX-Book-Ratings.csv', encoding='cp1251', sep=';', on_bad_lines='skip',
+                          low_memory=False)
     ratings = ratings[ratings['Book-Rating'] != 0]
     dataset = pd.merge(ratings, books, on=['ISBN'])
     return dataset
 
 
 def relevant_books(data):
-    ratings_relevant = data.groupby(['ISBN']).count()
-    ratings_relevant = ratings_relevant.reset_index()
+    ratings_relevant = data.groupby(['ISBN']).count().reset_index()
     ratings_relevant = ratings_relevant['ISBN'][ratings_relevant['User-ID'] > 70]
     ratings_relevant = data[data['ISBN'].isin(ratings_relevant)]
     return ratings_relevant
+
+
+def get_book_rating(data_low, title):
+    book_data = data_low[data_low['Book-Title'] == title]
+    book_rating = book_data.groupby('Book-Title').mean()
+    return book_rating['Book-Rating'].mean()
 
 
 def get_data(data, column):
@@ -26,34 +32,47 @@ def get_data(data, column):
     relevant_data.insert(0, '')
     return relevant_data
 
+
+def get_best_value(data, column, column2, avg):
+    data_values = data.groupby([column]).count().reset_index()
+    if avg == 'sum':
+        value = data_values[column2].sum()
+    elif avg == 'mean':
+        value = data_values[column2].mean()
+    else:
+        value = data_values[column2].count()
+    return value
+
+
 def get_genres():
     genres_list = ["Art", "Business", "Chick-Lit", "Children's", "Christian", "Classics", "Comendy",
-              "Comics", "Contemporary", "Cookbooks", "Crime", "Ebooks", "Fantasy", "Fiction", "Graphic Novels",
-              "Historical Fiction",
-              "History", "Horror", "LGBT", "Manga", "Memoir", "Music", "Mystery", "Nonfiction", "Paranormal",
-              "Philosophy",
-              "Poetry",
-              "Psychology", "Religion", "Romance", "Science", "Science Fiction", "Self Help", "Suspense",
-              "Spirituality",
-              "Sports",
-              "Thriller", "Travel", "Young Adult"]
+                   "Comics", "Contemporary", "Cookbooks", "Crime", "Ebooks", "Fantasy", "Fiction", "Graphic Novels",
+                   "Historical Fiction",
+                   "History", "Horror", "LGBT", "Manga", "Memoir", "Music", "Mystery", "Nonfiction", "Paranormal",
+                   "Philosophy",
+                   "Poetry",
+                   "Psychology", "Religion", "Romance", "Science", "Science Fiction", "Self Help", "Suspense",
+                   "Spirituality",
+                   "Sports",
+                   "Thriller", "Travel", "Young Adult"]
     return genres_list
 
-def lowercase(dataset_merge):
+
+def lowercase(data):
     """
     Function
     :return:
     """
-    return dataset_merge.apply(lambda x: x.str.lower() if (x.dtype == 'object') else x)
+    return data.apply(lambda x: x.str.lower() if (x.dtype == 'object') else x)
 
 
-def author_find(dataset_lowercase, book_name, book_author):
+def author_find(dataset_low, book_name, book_author):
     """
     The function returns array list of users who have rated author.
     """
 
-    author_readers = dataset_lowercase['User-ID'][(dataset_lowercase['Book-Title'] == book_name) & (
-        dataset_lowercase['Book-Author'].str.contains(book_author))]
+    author_readers = dataset_low['User-ID'][(dataset_low['Book-Title'] == book_name) & (
+        dataset_low['Book-Author'].str.contains(book_author))]
     author_readers = author_readers.tolist()
     author_readers = np.unique(author_readers)
     return author_readers
@@ -126,13 +145,15 @@ def main(dataset_lowercase, book_name, book_author, books_choice):
 
     result_list = all_correlations(books_choice, dataset_for_corr, ratings_data_raw_nodup)
 
-
-    return result_list[0][0]
+    return result_list
 
 
 # RUN
 dataset_base = dataset_merge()
 dataset_lowercase = lowercase(dataset_base)
+number_of_users = get_best_value(dataset_base, 'User-ID', 'User-ID', 'count')
+number_of_books = get_best_value(dataset_base, 'ISBN', 'Book-Title', 'count')
+number_of_ratings = get_best_value(dataset_base, 'User-ID', 'ISBN', 'sum')
 genres = get_genres()
 books_relevant = relevant_books(dataset_base)
 select_authors = get_data(books_relevant, 'Book-Author')
