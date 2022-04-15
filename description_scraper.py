@@ -49,7 +49,6 @@ def get_description(soup):
 
 def main(book_title):
     search_book = get_search(book_title)
-    print(search_book)
     search_page_soup = get_soup(search_book)
     search_book = find_book(search_page_soup)
 
