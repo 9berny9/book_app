@@ -135,10 +135,10 @@ def correlation_by_book(dataset_of_other_books, dataset_for_corr, book, ratings_
     return corr_fellowship
 
 
-def main(dataset_lowercase, book_name, book_author, books_choice):
-    author_readers = author_find(dataset_lowercase, book_name, book_author)
+def main(dataset_low, book_name, book_author, books_choice):
+    author_readers = author_find(dataset_low, book_name, book_author)
     # final dataset with users, books and ratings
-    books_of_author_readers = dataset_lowercase[(dataset_lowercase['User-ID'].isin(author_readers))]
+    books_of_author_readers = dataset_low[(dataset_low['User-ID'].isin(author_readers))]
     ratings_data_raw = ratings_data(books_of_author_readers)
     ratings_data_raw_nodup = ratings_nodup(ratings_data_raw)
     dataset_for_corr = ratings_data_raw_nodup.pivot(index='User-ID', columns='Book-Title', values='Book-Rating')
