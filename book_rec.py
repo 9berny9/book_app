@@ -11,6 +11,33 @@ def dataset_merge():
     return dataset
 
 
+def relevant_books(data):
+    ratings_relevant = data.groupby(['ISBN']).count()
+    ratings_relevant = ratings_relevant.reset_index()
+    ratings_relevant = ratings_relevant['ISBN'][ratings_relevant['User-ID'] > 70]
+    ratings_relevant = data[data['ISBN'].isin(ratings_relevant)]
+    return ratings_relevant
+
+
+def get_data(data, column):
+    relevant_data = data.groupby([column]).count()
+    relevant_data = relevant_data.sort_values(by=column).reset_index()
+    relevant_data = relevant_data[column].to_list()
+    relevant_data.insert(0, '')
+    return relevant_data
+
+def get_genres():
+    genres = ["Art", "Business", "Chick-Lit", "Children's", "Christian", "Classics", "Comendy",
+              "Comics", "Contemporary", "Cookbooks", "Crime", "Ebooks", "Fantasy", "Fiction", "Graphic Novels",
+              "Historical Fiction",
+              "History", "Horror", "LGBT", "Manga", "Memoir", "Music", "Mystery", "Nonfiction", "Paranormal",
+              "Philosophy",
+              "Poetry",
+              "Psychology", "Religion", "Romance", "Science", "Science Fiction", "Self Help", "Suspense",
+              "Spirituality",
+              "Sports",
+              "Thriller", "Travel", "Young Adult"]
+    return genres
 
 def lowercase(dataset_merge):
     """
@@ -99,8 +126,13 @@ def main(dataset_lowercase, book_name, book_author, books_choice):
 
     result_list = all_correlations(books_choice, dataset_for_corr, ratings_data_raw_nodup)
 
-    # top_books = result_list[0][0]
-    # worst_books = result_list[1][0]
 
-    #book_rating = ratings_data_raw["Book-Rating"][ratings_data_raw['Book-Title'] == book_name].groupby(ratings_data_raw['Book-Title']).mean()
-    return result_list
+    return result_list[0][0]
+
+
+# RUN
+dataset_base = dataset_merge()
+dataset_lowercase = lowercase(dataset_base)
+genres = get_genres()
+books_relevant = relevant_books(dataset_base)
+select_authors = get_data(books_relevant, 'Book-Author')
