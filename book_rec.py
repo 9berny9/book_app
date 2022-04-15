@@ -4,8 +4,8 @@ import numpy as np
 
 
 def dataset_merge():
-    books = pd.read_csv('BX-Books.csv', encoding='cp1251', sep=';', on_bad_lines='skip', low_memory=False)
-    ratings = pd.read_csv('BX-Book-Ratings.csv', encoding='cp1251', sep=';', on_bad_lines='skip', low_memory=False)
+    books = pd.read_csv('csv_files/BX-Books.csv', encoding='cp1251', sep=';', on_bad_lines='skip', low_memory=False)
+    ratings = pd.read_csv('csv_files/BX-Book-Ratings.csv', encoding='cp1251', sep=';', on_bad_lines='skip', low_memory=False)
     ratings = ratings[ratings['Book-Rating'] != 0]
     dataset = pd.merge(ratings, books, on=['ISBN'])
     return dataset
