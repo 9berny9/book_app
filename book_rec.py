@@ -3,12 +3,8 @@ import pandas as pd
 import numpy as np
 
 
-def dataset_merge():
-    books = pd.read_csv('csv_files/BX-Books.csv', encoding='cp1251', sep=';', on_bad_lines='skip', low_memory=False)
-    ratings = pd.read_csv('csv_files/BX-Book-Ratings.csv', encoding='cp1251', sep=';', on_bad_lines='skip',
-                          low_memory=False)
-    ratings = ratings[ratings['Book-Rating'] != 0]
-    dataset = pd.merge(ratings, books, on=['ISBN'])
+def dataset_merge(books_base, ratings_base):
+    dataset = pd.merge(ratings_base, books_base, on=['ISBN'])
     return dataset
 
 
@@ -27,8 +23,8 @@ def main(dataset_low, book_name, book_author, books_choice):
     ratings_data_raw = ratings_data(books_of_author_readers)
     ratings_data_raw_nodup = ratings_nodup(ratings_data_raw)
     dataset_for_corr = ratings_data_raw_nodup.pivot(index='User-ID', columns='Book-Title', values='Book-Rating')
-    result_list = all_correlations(books_choice, dataset_for_corr, ratings_data_raw_nodup)
-    return result_list
+    result_dataset = all_correlations(books_choice, dataset_for_corr, ratings_data_raw_nodup)
+    return result_dataset
 
 
 def author_find(dataset_low, book_name, book_author):
@@ -79,7 +75,7 @@ def all_correlations(books_choice, dataset_for_corr, ratings_data_raw_nodup):
         result_list[0].append(corr_fellowship.sort_values('corr', ascending=False).head(8))
         # worst 10 books
         result_list[1].append(corr_fellowship.sort_values('corr', ascending=False).tail(8))
-        return result_list
+    return result_list
 
 
 def correlation_by_book(dataset_of_other_books, dataset_for_corr, book, ratings_data_raw):
@@ -147,12 +143,28 @@ def get_genres():
     return genres_list
 
 
-# RUN
-dataset_base = dataset_merge()
+def get_dataset_for_corr(data_base, book_name):
+    url_img = data_base[data_base['Book-Title'].str.lower() == book_name].iloc[0]
+    return url_img
+
+
+# ---------------RUN--------------------------
+# load data
+books = pd.read_csv('csv_files/BX-Books.csv', encoding='cp1251', sep=';', on_bad_lines='skip', low_memory=False)
+ratings = pd.read_csv('csv_files/BX-Book-Ratings.csv', encoding='cp1251', sep=';', on_bad_lines='skip',
+                      low_memory=False)
+ratings = ratings[ratings['Book-Rating'] != 0]
+# ratings merge with books
+dataset_base = dataset_merge(books, ratings)
+# dataset with only lowercase
 dataset_lowercase = lowercase(dataset_base)
+# aggregations for app
 number_of_users = get_best_value(dataset_base, 'User-ID', 'User-ID', 'count')
 number_of_books = get_best_value(dataset_base, 'ISBN', 'Book-Title', 'count')
 number_of_ratings = get_best_value(dataset_base, 'User-ID', 'ISBN', 'sum')
+# list with all books genres
 genres = get_genres()
+# books with a lot of ratings
 books_relevant = relevant_books(dataset_base)
+# list with relevant authors for searching
 select_authors = get_data(books_relevant, 'Book-Author')

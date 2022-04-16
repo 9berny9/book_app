@@ -4,14 +4,13 @@ import requests
 import re
 
 
-def main(book_title):
+def get_soup_book(book_title):
     search_book = get_search(book_title)
     search_page_soup = get_soup(search_book)
     search_book = find_book(search_page_soup)
     search_href = get_href(search_book)
     book_soup = get_soup(search_href)
-    book_desc = get_description(book_soup)
-    return book_desc
+    return book_soup
 
 
 def get_search(search_term):
@@ -47,3 +46,15 @@ def get_description(soup):
     book_description = soup.find_all('div', id="description")
     book_description = book_description[0].find_all('span')
     return book_description[1].text
+
+
+def get_title(soup):
+    book_title = soup.find('h1', class_="gr-h1 gr-h1--serif")
+    book_title = book_title.text
+    return book_title.lstrip()
+
+
+def get_author(soup):
+    book_author = soup.find('a', {"class" : "authorName"})
+    return book_author.text
+

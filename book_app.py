@@ -45,11 +45,58 @@ def main():
 
                 if best_box:
                     st.markdown('#### Best recommendations:')
-                    for i in result[0][0]:
-                        print(i)
+                    for i in result[0][0]['book']:
+                        book_data = br.get_dataset_for_corr(br.dataset_base, i)
+                        book_description(book_data['Book-Title'], book_data['Book-Author'])
 
                 if worst_box:
-                    st.write(result[1][0])
+                    st.markdown('#### Worst recommendations:')
+                    idx = 0
+                    book_list_corr = result[0][0]['book'].to_list()
+
+                    for i in range(len(book_list_corr) - 1):
+                        cols = st.columns(3)
+
+                        if idx < len(book_list_corr) - 1:
+                            book_corr_data = br.get_dataset_for_corr(br.dataset_base, book_list_corr[i])
+                            book_corr_name = book_corr_data['Book-Title']
+                            book_corr_author = book_corr_data['Book-Author']
+                            url_img = br.get_book_img(br.dataset_base, book_corr_name)
+                            book_cover = Image.open(requests.get(url_img, stream=True).raw)
+                            cols[0].image(book_cover, width=170,
+                                          caption=f'{book_corr_name} by {book_corr_author}')
+                        idx += 1
+
+                        if idx < len(book_list_corr) - 1:
+                            cols[1].image(images_of_related_books[idx], width=175,
+                                          caption=f'{names_of_related_books[idx]} by {authors_of_related_books[idx]}')
+                        idx += 1
+                        if idx < len(book_list_corr) - 1:
+                            cols[2].image(images_of_related_books[idx], width=175,
+                                          caption=f'{names_of_related_books[idx]} by {authors_of_related_books[idx]}')
+                            idx = idx + 1
+                        else:
+                            break
+
+
+                    cols = st.columns(3)
+                    if
+                    for i in range(2)
+                    for i in result[0][0]['book']:
+                        book_data = br.get_dataset_for_corr(br.dataset_base, i)
+                        book_description(book_data['Book-Title'], book_data['Book-Author'])
+
+
+def books_short_desc(book_name, book_author):
+    url_img = br.get_book_img(br.dataset_base, book_name)
+    book_cover = Image.open(requests.get(url_img, stream=True).raw)
+    col1, col2, col3 = st.columns(3)
+    col1.image(book_cover, width=170)
+    col2.write(f"<b>{book_name}</b>", unsafe_allow_html=True)
+    col2.write(f"<b>{book_author}</b>", unsafe_allow_html=True)
+    col2.write(f"<b>{round(br.get_book_rating(br.dataset_base, book_name), 1)}/10</b>", unsafe_allow_html=True)
+    soup_for_book = ds.get_soup_book(book_name)
+    col2.write(ds.get_description(soup_for_book))
 
 
 def book_description(book_name, book_author):
@@ -60,7 +107,8 @@ def book_description(book_name, book_author):
     col2.write(f"<b>{book_name}</b>", unsafe_allow_html=True)
     col2.write(f"<b>{book_author}</b>", unsafe_allow_html=True)
     col2.write(f"<b>{round(br.get_book_rating(br.dataset_base, book_name), 1)}/10</b>", unsafe_allow_html=True)
-    col2.write(ds.main(book_name))
+    soup_for_book = ds.get_soup_book(book_name)
+    col2.write(ds.get_description(soup_for_book))
 
 
 if __name__ == '__main__':
