@@ -3,20 +3,26 @@ from bs4 import BeautifulSoup as bs
 import requests
 import re
 
+
+def main(book_title):
+    search_book = get_search(book_title)
+    search_page_soup = get_soup(search_book)
+    search_book = find_book(search_page_soup)
+    search_href = get_href(search_book)
+    book_soup = get_soup(search_href)
+    book_desc = get_description(book_soup)
+    return book_desc
+
+
 def get_search(search_term):
     """
     Generate url from search term
     """
-    template = 'https://www.goodreads.com/search?q={}'
+    template = 'https://www.google.com/search?q={}'
+    search_term = f"""{search_term} goodreads"""
     search_term = re.sub(r'[^\w]', ' ', search_term)
     url = search_term.replace(' ', '+')
     return template.format(url)
-
-
-def get_book_url(book_href):
-    template = 'https://www.goodreads.com'
-    book_url = template + book_href
-    return book_url
 
 
 def get_soup(url):
@@ -28,13 +34,8 @@ def get_soup(url):
 
 
 def find_book(soup):
-    book = soup.find_all('td')
+    book = soup.find_all('div', {'class': 'yuRUbf'})
     return book[0]
-
-
-def get_title(book):
-    book_title = book.find('a').text
-    return book_title
 
 
 def get_href(soup):
@@ -43,22 +44,6 @@ def get_href(soup):
 
 
 def get_description(soup):
-    book_description = soup.find('div', id="description")
-    book_description = book_description.find_all('span')
+    book_description = soup.find_all('div', id="description")
+    book_description = book_description[0].find_all('span')
     return book_description[1].text
-
-def main(book_title):
-    search_book = get_search(book_title)
-    search_page_soup = get_soup(search_book)
-    search_book = find_book(search_page_soup)
-
-    #search_title = get_title(search_book)
-    search_href = get_href(search_book)
-    book_url = get_book_url(search_href)
-    book_soup = get_soup(book_url)
-    book_desc = get_description(book_soup)
-    return book_desc
-
-
-
-
