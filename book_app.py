@@ -5,10 +5,6 @@ import description_scraper as ds
 import requests
 from PIL import Image
 
-with open('style.css') as f:
-    st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
-
-
 
 def main():
     with open('style.css') as f:
@@ -54,6 +50,7 @@ def main():
 
                 if worst_box:
                     st.write(result[1][0])
+
 
 def book_description(book_name, book_author):
     url_img = br.get_book_img(br.dataset_base, book_name)
