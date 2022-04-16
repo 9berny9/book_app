@@ -79,13 +79,6 @@ def main():
                             break
 
 
-                    cols = st.columns(3)
-                    if
-                    for i in range(2)
-                    for i in result[0][0]['book']:
-                        book_data = br.get_dataset_for_corr(br.dataset_base, i)
-                        book_description(book_data['Book-Title'], book_data['Book-Author'])
-
 
 def books_short_desc(book_name, book_author):
     url_img = br.get_book_img(br.dataset_base, book_name)
