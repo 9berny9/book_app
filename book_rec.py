@@ -12,58 +12,23 @@ def dataset_merge():
     return dataset
 
 
-def relevant_books(data):
-    ratings_relevant = data.groupby(['ISBN']).count().reset_index()
-    ratings_relevant = ratings_relevant['ISBN'][ratings_relevant['User-ID'] > 70]
-    ratings_relevant = data[data['ISBN'].isin(ratings_relevant)]
-    return ratings_relevant
-
-
-def get_book_rating(data_low, title):
-    book_data = data_low[data_low['Book-Title'] == title]
-    book_rating = book_data.groupby('Book-Title').mean()
-    return book_rating['Book-Rating'].mean()
-
-
-def get_data(data, column):
-    relevant_data = data.groupby([column]).count()
-    relevant_data = relevant_data.sort_values(by=column).reset_index()
-    relevant_data = relevant_data[column].to_list()
-    relevant_data.insert(0, '')
-    return relevant_data
-
-
-def get_best_value(data, column, column2, avg):
-    data_values = data.groupby([column]).count().reset_index()
-    if avg == 'sum':
-        value = data_values[column2].sum()
-    elif avg == 'mean':
-        value = data_values[column2].mean()
-    else:
-        value = data_values[column2].count()
-    return value
-
-
-def get_genres():
-    genres_list = ["Art", "Business", "Chick-Lit", "Children's", "Christian", "Classics", "Comendy",
-                   "Comics", "Contemporary", "Cookbooks", "Crime", "Ebooks", "Fantasy", "Fiction", "Graphic Novels",
-                   "Historical Fiction",
-                   "History", "Horror", "LGBT", "Manga", "Memoir", "Music", "Mystery", "Nonfiction", "Paranormal",
-                   "Philosophy",
-                   "Poetry",
-                   "Psychology", "Religion", "Romance", "Science", "Science Fiction", "Self Help", "Suspense",
-                   "Spirituality",
-                   "Sports",
-                   "Thriller", "Travel", "Young Adult"]
-    return genres_list
-
-
 def lowercase(data):
     """
     Function
     :return:
     """
     return data.apply(lambda x: x.str.lower() if (x.dtype == 'object') else x)
+
+
+def main(dataset_low, book_name, book_author, books_choice):
+    author_readers = author_find(dataset_low, book_name, book_author)
+    # final dataset with users, books and ratings
+    books_of_author_readers = dataset_low[(dataset_low['User-ID'].isin(author_readers))]
+    ratings_data_raw = ratings_data(books_of_author_readers)
+    ratings_data_raw_nodup = ratings_nodup(ratings_data_raw)
+    dataset_for_corr = ratings_data_raw_nodup.pivot(index='User-ID', columns='Book-Title', values='Book-Rating')
+    result_list = all_correlations(books_choice, dataset_for_corr, ratings_data_raw_nodup)
+    return result_list
 
 
 def author_find(dataset_low, book_name, book_author):
@@ -135,17 +100,51 @@ def correlation_by_book(dataset_of_other_books, dataset_for_corr, book, ratings_
     return corr_fellowship
 
 
-def main(dataset_low, book_name, book_author, books_choice):
-    author_readers = author_find(dataset_low, book_name, book_author)
-    # final dataset with users, books and ratings
-    books_of_author_readers = dataset_low[(dataset_low['User-ID'].isin(author_readers))]
-    ratings_data_raw = ratings_data(books_of_author_readers)
-    ratings_data_raw_nodup = ratings_nodup(ratings_data_raw)
-    dataset_for_corr = ratings_data_raw_nodup.pivot(index='User-ID', columns='Book-Title', values='Book-Rating')
+def relevant_books(data):
+    ratings_relevant = data.groupby(['ISBN']).count().reset_index()
+    ratings_relevant = ratings_relevant['ISBN'][ratings_relevant['User-ID'] > 70]
+    ratings_relevant = data[data['ISBN'].isin(ratings_relevant)]
+    return ratings_relevant
 
-    result_list = all_correlations(books_choice, dataset_for_corr, ratings_data_raw_nodup)
 
-    return result_list
+def get_book_rating(data_low, title):
+    book_data = data_low[data_low['Book-Title'] == title]
+    book_rating = book_data.groupby('Book-Title').mean()
+    return book_rating['Book-Rating'].mean()
+
+
+def get_book_img(data_low, title):
+    book_data = data_low[data_low['Book-Title'] == title]
+    return book_data['Image-URL-L'].iloc[0]
+
+
+def get_data(data, column):
+    relevant_data = data.groupby([column]).count()
+    relevant_data = relevant_data.sort_values(by=column).reset_index()
+    relevant_data = relevant_data[column].to_list()
+    relevant_data.insert(0, '')
+    return relevant_data
+
+
+def get_best_value(data, column, column2, avg):
+    data_values = data.groupby([column]).count().reset_index()
+    if avg == 'sum':
+        value = data_values[column2].sum()
+    elif avg == 'mean':
+        value = data_values[column2].mean()
+    else:
+        value = data_values[column2].count()
+    return value
+
+
+def get_genres():
+    genres_list = ["Art", "Business", "Chick-Lit", "Children's", "Christian", "Classics", "Comendy",
+                   "Comics", "Contemporary", "Cookbooks", "Crime", "Ebooks", "Fantasy", "Fiction", "Graphic Novels",
+                   "Historical Fiction", "History", "Horror", "LGBT", "Manga", "Memoir", "Music", "Mystery",
+                   "Nonfiction", "Paranormal", "Philosophy", "Poetry", "Psychology", "Religion", "Romance", "Science",
+                   "Science Fiction", "Self Help", "Suspense", "Spirituality", "Sports", "Thriller", "Travel",
+                   "Young Adult"]
+    return genres_list
 
 
 # RUN
