@@ -3,34 +3,21 @@ import pandas as pd
 import numpy as np
 
 
-def dataset_merge(books_base, ratings_base):
-    dataset = pd.merge(ratings_base, books_base, on=['ISBN'])
-    return dataset
+def main(data_merge, book_choice, book_author):
+    # dataset with only lowercase
+    dataset_lowercase = data_merge.apply(lambda x: x.str.lower() if (x.dtype == 'object') else x)
+    author_readers = author_find(dataset_lowercase, book_choice, book_author)
 
-
-def isbn_languages():
-    languages = {"English": ["0", "1"], "French": "2", "German": "3", "Japan": "4", "Czech": "80",
-                 "Spain": "84", "Others" : "All"}
-    return languages
-
-
-def lowercase(data):
-    """
-    Function
-    :return:
-    """
-    return data.apply(lambda x: x.str.lower() if (x.dtype == 'object') else x)
-
-
-def main(dataset_low, book_choice, book_author):
-    author_readers = author_find(dataset_low, book_choice, book_author)
-    # final dataset with users, books and ratings
-    books_of_author_readers = dataset_low[(dataset_low['User-ID'].isin(author_readers))]
-    ratings_data_raw = ratings_data(books_of_author_readers)
-    ratings_data_raw_nodup = ratings_nodup(ratings_data_raw)
-    dataset_for_corr = ratings_data_raw_nodup.pivot(index='User-ID', columns='Book-Title', values='Book-Rating')
-    result_dataset = all_correlations(book_choice, dataset_for_corr, ratings_data_raw_nodup)
-    return result_dataset
+    if len(author_readers) > 10:
+        # final dataset with users, books and ratings
+        books_of_author_readers = dataset_lowercase[(dataset_lowercase['User-ID'].isin(author_readers))]
+        ratings_data_raw = ratings_data(books_of_author_readers)
+        ratings_data_raw_nodup = ratings_nodup(ratings_data_raw)
+        dataset_for_corr = ratings_data_raw_nodup.pivot(index='User-ID', columns='Book-Title', values='Book-Rating')
+        result_dataset = all_correlations(book_choice, dataset_for_corr, ratings_data_raw_nodup)
+        return result_dataset
+    else:
+        return False
 
 
 def author_find(dataset_low, book_name, book_author):
@@ -97,76 +84,7 @@ def correlation_by_book(dataset_of_other_books, dataset_for_corr, book, ratings_
     return corr_fellowship
 
 
-def relevant_books(data):
-    ratings_relevant = data.groupby(['ISBN']).count().reset_index()
-    ratings_relevant = ratings_relevant['ISBN'][ratings_relevant['User-ID'] > 70]
-    ratings_relevant = data[data['ISBN'].isin(ratings_relevant)]
-    return ratings_relevant
 
 
-def get_book_rating(data_low, title):
-    book_data = data_low[data_low['Book-Title'] == title]
-    book_rating = book_data.groupby('Book-Title').mean()
-    return book_rating['Book-Rating'].mean()
 
 
-def get_book_img(data, title):
-    book_data = data[data['Book-Title'] == title]
-    return book_data['Image-URL-L'].iloc[0]
-
-
-def get_data(data, column):
-    relevant_data = data.groupby([column]).count()
-    relevant_data = relevant_data.sort_values(by=column).reset_index()
-    relevant_data = relevant_data[column].to_list()
-    relevant_data.insert(0, '')
-    return relevant_data
-
-
-def get_best_value(data, column, column2, avg):
-    data_values = data.groupby([column]).count().reset_index()
-    if avg == 'sum':
-        value = data_values[column2].sum()
-    elif avg == 'mean':
-        value = data_values[column2].mean()
-    else:
-        value = data_values[column2].count()
-    return value
-
-
-def get_genres():
-    genres_list = ["Art", "Business", "Chick-Lit", "Children's", "Christian", "Classics", "Comendy",
-                   "Comics", "Contemporary", "Cookbooks", "Crime", "Ebooks", "Fantasy", "Fiction", "Graphic Novels",
-                   "Historical Fiction", "History", "Horror", "LGBT", "Manga", "Memoir", "Music", "Mystery",
-                   "Nonfiction", "Paranormal", "Philosophy", "Poetry", "Psychology", "Religion", "Romance", "Science",
-                   "Science Fiction", "Self Help", "Suspense", "Spirituality", "Sports", "Thriller", "Travel",
-                   "Young Adult"]
-    return genres_list
-
-
-def get_dataset_for_corr(data_base, book_name):
-    url_img = data_base[data_base['Book-Title'].str.lower() == book_name].iloc[0]
-    return url_img
-
-
-# ---------------RUN--------------------------
-# load data
-books = pd.read_csv('csv_files/BX-Books.csv', encoding='cp1251', sep=';', on_bad_lines='skip', low_memory=False)
-ratings = pd.read_csv('csv_files/BX-Book-Ratings.csv', encoding='cp1251', sep=';', on_bad_lines='skip',
-                      low_memory=False)
-ratings = ratings[ratings['Book-Rating'] != 0]
-# ratings merge with books
-dataset_base = dataset_merge(books, ratings)
-# dataset with only lowercase
-dataset_lowercase = lowercase(dataset_base)
-# aggregations for app
-number_of_users = get_best_value(dataset_base, 'User-ID', 'User-ID', 'count')
-number_of_books = get_best_value(dataset_base, 'ISBN', 'Book-Title', 'count')
-number_of_ratings = get_best_value(dataset_base, 'User-ID', 'ISBN', 'sum')
-# list with all books genres
-genres = get_genres()
-# books with a lot of ratings
-books_relevant = relevant_books(dataset_base)
-# list with relevant authors for searching
-select_authors = get_data(books_relevant, 'Book-Author')
-languages = isbn_languages()
