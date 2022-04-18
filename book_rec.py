@@ -8,6 +8,12 @@ def dataset_merge(books_base, ratings_base):
     return dataset
 
 
+def isbn_languages():
+    languages = {"English": ["0", "1"], "French": "2", "German": "3", "Japan": "4", "Czech": "80",
+                 "Spain": "84", "Others" : "All"}
+    return languages
+
+
 def lowercase(data):
     """
     Function
@@ -16,14 +22,14 @@ def lowercase(data):
     return data.apply(lambda x: x.str.lower() if (x.dtype == 'object') else x)
 
 
-def main(dataset_low, book_name, book_author, books_choice):
-    author_readers = author_find(dataset_low, book_name, book_author)
+def main(dataset_low, book_choice, book_author):
+    author_readers = author_find(dataset_low, book_choice, book_author)
     # final dataset with users, books and ratings
     books_of_author_readers = dataset_low[(dataset_low['User-ID'].isin(author_readers))]
     ratings_data_raw = ratings_data(books_of_author_readers)
     ratings_data_raw_nodup = ratings_nodup(ratings_data_raw)
     dataset_for_corr = ratings_data_raw_nodup.pivot(index='User-ID', columns='Book-Title', values='Book-Rating')
-    result_dataset = all_correlations(books_choice, dataset_for_corr, ratings_data_raw_nodup)
+    result_dataset = all_correlations(book_choice, dataset_for_corr, ratings_data_raw_nodup)
     return result_dataset
 
 
@@ -59,22 +65,17 @@ def ratings_nodup(ratings_data_raw):
     return ratings_data_raw_nodup
 
 
-def all_correlations(books_choice, dataset_for_corr, ratings_data_raw_nodup):
-    result_list = [[], []]
+def all_correlations(book_choice, dataset_for_corr, ratings_data_raw_nodup):
+    result_list = []
 
-    for book in books_choice:
-        # Take out the author's selected book from correlation dataframe
-        dataset_of_other_books = dataset_for_corr.copy(deep=False)
+    # Take out the author's selected book from correlation dataframe
+    dataset_of_other_books = dataset_for_corr.copy(deep=False)
+    dataset_of_other_books.drop(book_choice, axis=1, inplace=True)
 
-        if book in dataset_for_corr:
-            dataset_of_other_books.drop([book], axis=1, inplace=True)
+    corr_fellowship = correlation_by_book(dataset_of_other_books, dataset_for_corr, book_choice, ratings_data_raw_nodup)
 
-        corr_fellowship = correlation_by_book(dataset_of_other_books, dataset_for_corr, book, ratings_data_raw_nodup)
-
-        # top 10 books with highest corr
-        result_list[0].append(corr_fellowship.sort_values('corr', ascending=False).head(8))
-        # worst 10 books
-        result_list[1].append(corr_fellowship.sort_values('corr', ascending=False).tail(8))
+    # all corr books
+    result_list.append(corr_fellowship.sort_values('corr', ascending=False))
     return result_list
 
 
@@ -90,7 +91,7 @@ def correlation_by_book(dataset_of_other_books, dataset_for_corr, book, ratings_
         tab = (ratings_data_raw[ratings_data_raw['Book-Title'] == book_title].groupby(
             ratings_data_raw['Book-Title']).mean())
         avgrating.append(tab['Book-Rating'].min())
-    # final dataframe of all correlation of each book
+    # final dataframe of all correlation for book
     corr_fellowship = pd.DataFrame(list(zip(book_titles, correlations, avgrating)),
                                    columns=['book', 'corr', 'avg_rating'])
     return corr_fellowship
@@ -109,8 +110,8 @@ def get_book_rating(data_low, title):
     return book_rating['Book-Rating'].mean()
 
 
-def get_book_img(data_low, title):
-    book_data = data_low[data_low['Book-Title'] == title]
+def get_book_img(data, title):
+    book_data = data[data['Book-Title'] == title]
     return book_data['Image-URL-L'].iloc[0]
 
 
@@ -168,3 +169,4 @@ genres = get_genres()
 books_relevant = relevant_books(dataset_base)
 # list with relevant authors for searching
 select_authors = get_data(books_relevant, 'Book-Author')
+languages = isbn_languages()

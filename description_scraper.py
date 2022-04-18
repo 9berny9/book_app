@@ -6,6 +6,7 @@ import re
 
 def get_soup_book(book_title):
     search_book = get_search(book_title)
+    print(search_book)
     search_page_soup = get_soup(search_book)
     search_book = find_book(search_page_soup)
     search_href = get_href(search_book)
