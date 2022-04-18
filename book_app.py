@@ -2,7 +2,7 @@ import streamlit as st
 import book_rec as br
 import re
 import description_scraper as ds
-import clearing as c
+import functions as f
 import requests
 import pandas as pd
 from PIL import Image
@@ -20,10 +20,10 @@ def header(data_b, data_r):
 
 
 def book_rec_img(data_merge, book_corr, column, column_number, number):
-    book_corr_data = c.get_dataset_for_corr(data_merge, book_corr[column_number])
+    book_corr_data = f.get_dataset_for_corr(data_merge, book_corr[column_number])
     book_corr_name = book_corr_data["Book-Title"]
     book_corr_author = book_corr_data["Book-Author"]
-    url_img = c.get_book_img(data_merge, book_corr_name)
+    url_img = f.get_book_img(data_merge, book_corr_name)
     book_cover = Image.open(requests.get(url_img, stream=True).raw)
     column[number].image(book_cover, width=170,
                          caption=f"{book_corr_name} by {book_corr_author}")
@@ -49,14 +49,14 @@ def recommendation(book_corr, data_merge):
 
 
 def book_description(title, data, data_low):
-    url_img = c.get_book_img(data, title)
-    author = c.get_book_author(data, title)
+    url_img = f.get_book_img(data, title)
+    author = f.get_book_author(data, title)
     book_cover = Image.open(requests.get(url_img, stream=True).raw)
     col1, col2 = st.columns((1, 2.5))
     col1.image(book_cover, width=170)
     col2.write(f"<b>{title}</b>", unsafe_allow_html=True)
     col2.write(f"<b>{author}</b>", unsafe_allow_html=True)
-    col2.write(f"<b>{round(c.get_book_rating(data_low, title.lower()), 1)}/10</b>", unsafe_allow_html=True)
+    col2.write(f"<b>{round(f.get_book_rating(data_low, title.lower()), 1)}/10</b>", unsafe_allow_html=True)
     soup_for_book = ds.get_soup_book(title)
     col2.write(ds.get_description(soup_for_book))
 
@@ -97,12 +97,12 @@ if __name__ == "__main__":
     dataset_lowercase = data_lower(dataset)
     user_name = st.text_input("Enter your name:")
     if user_name:
-        select_genres = st.multiselect("Select your favorite genres:", c.get_genres())
+        select_genres = st.multiselect("Select your favorite genres:", f.get_genres())
         if select_genres:
-            publisher_language = st.selectbox("Select publisher's language:", c.publisher_languages().keys())
+            publisher_language = st.selectbox("Select publisher's language:", f.publisher_languages().keys())
             if publisher_language:
                 book_author = st.text_input("Select author's last name:")
-                books_language = c.get_language(dataset, publisher_language)
+                books_language = f.get_language(dataset, publisher_language)
                 if book_author:
                     book_title = st.selectbox(f"Select book's name:", get_books(books_language, book_author))
                     check1, check2, check3 = st.columns(3)

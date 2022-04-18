@@ -1,6 +1,3 @@
-import book_rec as br
-import requests
-from PIL import Image
 
 
 def publisher_languages():
