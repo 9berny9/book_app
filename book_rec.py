@@ -9,7 +9,7 @@ def main(data_merge, book_choice, book_author):
     author_readers = author_find(dataset_lowercase, book_choice, book_author)
 
     if len(author_readers) > 10:
-        # final dataset with users, books and ratings
+        #  final dataset with users, books and ratings
         books_of_author_readers = dataset_lowercase[(dataset_lowercase['User-ID'].isin(author_readers))]
         ratings_data_raw = ratings_data(books_of_author_readers)
         ratings_data_raw_nodup = ratings_nodup(ratings_data_raw)
