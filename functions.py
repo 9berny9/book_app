@@ -1,5 +1,4 @@
 
-
 def publisher_languages():
     languages = {"English": ["0", "1"], "French": "2", "German": "3"}
     return languages
@@ -7,7 +6,7 @@ def publisher_languages():
 
 def get_language(data, selected_language):
     language_condition = publisher_languages()
-    return data[data["ISBN"].str.startswith(tuple(language_condition[selected_language]), na=False)]
+    return data[data.isbn.str.startswith(tuple(language_condition[selected_language]), na=False)]
 
 
 def get_genres():
@@ -21,13 +20,13 @@ def get_genres():
 
 
 def get_dataset_for_corr(data_base, book_name):
-    url_img = data_base[data_base["Book-Title"].str.lower() == book_name].iloc[0]
+    url_img = data_base[data_base.title.str.lower() == book_name].iloc[0]
     return url_img
 
 
 def get_book_author(data, title):
-    book_data = data[data["Book-Title"] == title]
-    return book_data["Book-Author"].iloc[0]
+    book_data = data[data.title == title]
+    return book_data.author.iloc[0]
 
 
 def get_book_img(data, title):

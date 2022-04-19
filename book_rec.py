@@ -1,42 +1,34 @@
 # import
 import pandas as pd
-import numpy as np
+from load_data import RATING_AMOUNTS, dataset_lowercase
 
 
-def main(data_merge, book_choice, book_author):
-    # dataset with only lowercase
-    dataset_lowercase = data_merge.apply(lambda x: x.str.lower() if (x.dtype == 'object') else x)
-    author_readers = author_find(dataset_lowercase, book_choice, book_author)
+def recommender(book_choice: str, book_author: str):
+    author_readers = author_find(book_choice, book_author)
 
-    if len(author_readers) > 10:
-        #  final dataset with users, books and ratings
-        books_of_author_readers = dataset_lowercase[(dataset_lowercase['User-ID'].isin(author_readers))]
-        ratings_data_raw = ratings_data(books_of_author_readers)
-        ratings_data_raw_nodup = ratings_nodup(ratings_data_raw)
-        dataset_for_corr = ratings_data_raw_nodup.pivot(index='User-ID', columns='Book-Title', values='Book-Rating')
-        result_dataset = all_correlations(book_choice, dataset_for_corr, ratings_data_raw_nodup)
-        return result_dataset
-    else:
-        return False
+    #  final dataset with users, books and ratings
+    books_of_author_readers = dataset_lowercase[(dataset_lowercase.id.isin(author_readers))]
+    ratings_data_raw = ratings_data(books_of_author_readers)
+    ratings_data_raw_nodup = ratings_nodup(ratings_data_raw)
+    dataset_for_corr = ratings_data_raw_nodup.pivot(index='id', columns='title', values='rating')
+    result_dataset = all_correlations(book_choice, dataset_for_corr, ratings_data_raw_nodup)
+    return result_dataset
 
 
-def author_find(dataset_low, book_name, book_author):
+def author_find(book_name: str, book_author: str):
     """
-    The function returns array list of users who have rated author.
+    The function returns dataframe of users who have rated author.
     """
-
-    author_readers = dataset_low['User-ID'][(dataset_low['Book-Title'] == book_name) & (
-        dataset_low['Book-Author'].str.contains(book_author))]
-    author_readers = author_readers.tolist()
-    author_readers = np.unique(author_readers)
-    return author_readers
+    author_readers = dataset_lowercase.id[(dataset_lowercase.title == book_name) & (
+        dataset_lowercase.author.str.contains(book_author))]
+    return dataset_lowercase[(dataset_lowercase.id.isin(author_readers.unique()))]
 
 
 def ratings_data(books_of_author_readers):
     # Number of ratings per other books in dataset
-    number_of_rating_per_book = books_of_author_readers.groupby(['Book-Title']).agg('count').reset_index()
+    number_of_rating_per_book = books_of_author_readers.groupby(['title']).agg('count').reset_index()
     # select only books which have actually higher number of ratings than threshold
-    books_to_compare = number_of_rating_per_book['Book-Title'][number_of_rating_per_book['User-ID'] >= 8]
+    books_to_compare = number_of_rating_per_book.title[number_of_rating_per_book.id >= RATING_AMOUNTS]
     books_to_compare = books_to_compare.tolist()
     # create dataset
     ratings_data_raw = books_of_author_readers[['User-ID', 'Book-Rating', 'Book-Title']][
@@ -46,7 +38,7 @@ def ratings_data(books_of_author_readers):
 
 def ratings_nodup(ratings_data_raw):
     # group by User and Book and compute mean
-    ratings_data_raw_nodup = ratings_data_raw.groupby(['User-ID', 'Book-Title'])['Book-Rating'].mean()
+    ratings_data_raw_nodup = ratings_data_raw.groupby(['id', 'title']).rating.mean()
     # reset index to see User-ID in every row
     ratings_data_raw_nodup = ratings_data_raw_nodup.to_frame().reset_index()
     return ratings_data_raw_nodup
@@ -71,27 +63,21 @@ def correlation_by_book(dataset_of_other_books, dataset_for_corr, book, ratings_
     book_titles = []
     correlations = []
     avgrating = []
+
+    # pridavat pouze do jednoho listu
+
     # corr computation
     for book_title in list(dataset_of_other_books.columns.values):
         book_titles.append(book_title)
         correlations.append(dataset_for_corr[book].corr(dataset_of_other_books[book_title]))
-        tab = (ratings_data_raw[ratings_data_raw['Book-Title'] == book_title].groupby(
-            ratings_data_raw['Book-Title']).mean())
-        avgrating.append(tab['Book-Rating'].min())
+        tab = (ratings_data_raw[ratings_data_raw.title == book_title].groupby(
+            ratings_data_raw.title).mean())
+        avgrating.append(tab.rating.min())
     # final dataframe of all correlation for book
+
+    # prejmenovat fellowship protoze
     corr_fellowship = pd.DataFrame(list(zip(book_titles, correlations, avgrating)),
                                    columns=['book', 'corr', 'avg_rating'])
     return corr_fellowship
 
 
-def merge_data():
-    ratings = pd.read_csv('csv_files/BX-Book-Ratings.csv', encoding='cp1251', sep=';', on_bad_lines='skip', low_memory=False)
-    ratings = ratings[ratings['Book-Rating'] != 0]
-    books = pd.read_csv('csv_files/BX-Books.csv', encoding='cp1251', sep=';', on_bad_lines='skip', low_memory=False)
-    return pd.merge(ratings, books, on=['ISBN'])
-
-
-if __name__ == "__main__":
-    dataset = merge_data()
-    result = main(dataset, "the fellowship of the ring (the lord of the rings, part 1)", "tolkien")
-    print(result[0].head(10))
