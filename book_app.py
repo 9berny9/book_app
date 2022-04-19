@@ -113,6 +113,9 @@ if __name__ == "__main__":
                         if description_box:
                             st.markdown("#### Book description:")
                             book_description(book_title, dataset, dataset_lowercase)
+                        if best_box:
+                            st.markdown("#### This book doesn't have enough data!")
+                        if worst_box:
                             st.markdown("#### This book doesn't have enough data!")
                     else:
                         result = br.main(dataset_lowercase, book_title.lower(), book_author.lower())
