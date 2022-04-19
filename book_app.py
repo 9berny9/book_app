@@ -9,56 +9,77 @@ from load_data import books, ratings, dataset, dataset_lowercase,\
     NUMBER_OF_RECOMMENDATIONS
 
 
-# prejmenovat
-def run_app():
-    read_style()
-    header()
+def user_select():
     user_name = st.text_input("Enter your name:")
-
-    # dat do funkce
     if user_name:
         select_genres = st.multiselect("Select your favorite genres:",
                                        f.get_genres())
-        if select_genres:
-            publisher_language = st.selectbox("Select publisher's language:",
-                                              f.publisher_languages().keys())
-            if publisher_language:
-                book_author = st.text_input("Select author's last name:")
-                books_language = f.get_language(dataset, publisher_language)
+        return select_genres
 
-                if book_author:
-                    book_title = st.selectbox(f"Select book's name:",
-                                              get_books(books_language,
-                                                        book_author))
-                    check1, check2, check3 = st.columns(3)
-                    description_box = check1.checkbox("Book description",
-                                                      value=False)
-                    best_box = check2.checkbox("Best recommendations",
-                                               value=False)
-                    worst_box = check3.checkbox("Worst recommendations",
-                                                value=False)
 
-                    recommended_books = recommender(book_title.lower(),
-                                                    book_author.lower())
-                    if description_box:
-                        st.markdown("#### Book description:")
-                        book_description(book_title)
-                    if len(recommended_books[0]) <= NUMBER_OF_RECOMMENDATIONS:
-                        if best_box or worst_box:
-                            st.markdown(
-                                "#### This book doesn't have enough data!")
-                    else:
-                        if best_box:
-                            st.markdown("#### Best recommendations:")
-                            book_list_corr = recommended_books[0]["book"].head(
-                                NUMBER_OF_RECOMMENDATIONS).to_list()
-                            recommendation(book_list_corr)
+def language_select(selected_genres):
+    if selected_genres:
+        publisher_language = st.selectbox("Select publisher's language:",
+                                          f.publisher_languages().keys())
+        books_language = f.get_language(dataset, publisher_language)
+        return books_language
 
-                        if worst_box:
-                            st.markdown("#### Worst recommendations:")
-                            book_list_corr = recommended_books[0]["book"].tail(
-                                NUMBER_OF_RECOMMENDATIONS).to_list()
-                            recommendation(book_list_corr)
+
+def author_select(selected_language):
+    if selected_language:
+        book_author = st.text_input("Select author's last name:")
+        return book_author
+
+
+def title_select(selected_author, selected_language):
+    if selected_author:
+        book_title = st.selectbox(f"Select book's name:",
+                                  get_books(selected_language,
+                                            selected_author))
+        return book_title
+
+
+def get_description(box, book_title):
+    if box:
+        st.markdown("#### Book description:")
+        book_description(book_title)
+
+
+def get_rec(corr_dataset, best_box, worst_box):
+    best_corr = corr_dataset.book.head(NUMBER_OF_RECOMMENDATIONS)
+    worst_corr = corr_dataset.book.tail(NUMBER_OF_RECOMMENDATIONS)
+
+    if len(corr_dataset) <= NUMBER_OF_RECOMMENDATIONS:
+        if best_box or worst_box:
+            st.markdown(
+                "#### This book doesn't have enough data!")
+    else:
+        if best_box:
+            st.markdown("#### Best recommendations:")
+            rec_images(best_corr)
+
+        if worst_box:
+            st.markdown("#### Worst recommendations:")
+            rec_images(worst_corr)
+
+
+def run_app():
+    read_style()
+    header()
+    genres = user_select()
+    language = language_select(genres)
+    author = author_select(language)
+    title = title_select(author, language)
+
+    # create three check columns
+    check1, check2, check3 = st.columns(3)
+    description_box = check1.checkbox("Book description", value=False)
+    best_box = check2.checkbox("Best recommendations", value=False)
+    worst_box = check3.checkbox("Worst recommendations", value=False)
+
+    all_recommendations = recommender(title.lower(), author.lower())
+    get_description(description_box, title)
+    get_rec(all_recommendations, best_box, worst_box)
 
 
 def read_style():
@@ -88,7 +109,7 @@ def book_rec_img(book_corr, column, column_number, number):
                          caption=f"{book_corr_name} by {book_corr_author}")
 
 
-def recommendation(book_corr):
+def rec_images(book_corr):
     # a pouzit enumerate misto indexu
     idx = 0
     for i in range(len(book_corr) - 1):
@@ -131,9 +152,3 @@ def get_books(dataset_language, searched_author):
     books_finding = books_finding.groupby("title").count().\
         sort_values("id", ascending=False).reset_index()
     return books_finding.title
-
-
-# dat do zvlast souboru na spusteni
-
-if __name__ == "__main__":
-    run_app()

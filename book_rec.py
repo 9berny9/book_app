@@ -53,7 +53,6 @@ def ratings_nodup(ratings_data_raw: DataFrame):
 
 def book_correlations(dataset_for_corr: DataFrame, book: str):
     recommended_books = []
-    result_list = []
     # corr computation
     for book_title in dataset_for_corr.columns.values:
         if book_title != book:
@@ -63,5 +62,5 @@ def book_correlations(dataset_for_corr: DataFrame, book: str):
     # final dataframe of all correlation for book
     correlations = pd.DataFrame(recommended_books,
                                 columns=['book', 'corr', 'avg_rating'])
-    result_list.append(correlations.sort_values('corr', ascending=False))
+    result_list = correlations.sort_values('corr', ascending=False)
     return result_list

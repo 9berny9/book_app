@@ -1,10 +1,15 @@
 
 def publisher_languages():
-    languages = {"English": ["0", "1"], "French": "2", "German": "3"}
-    return languages
+    """
+    Language dict where value is first number in ISBN.
+    """
+    return {"English": ["0", "1"], "French": "2", "German": "3"}
 
 
 def get_language(data, selected_language):
+    """
+    Function returns  dataset with selected language.
+    """
     language_condition = publisher_languages()
     language_condition = data[data.isbn.str.startswith(
         tuple(language_condition[selected_language]), na=False)]
@@ -12,6 +17,9 @@ def get_language(data, selected_language):
 
 
 def get_genres():
+    """
+    List of genres.
+    """
     genres_list = ["Art", "Business", "Chick-Lit", "Children's", "Christian",
                    "Classics", "Comendy", "Comics", "Contemporary",
                    "Cookbooks", "Crime", "Ebooks", "Fantasy", "Fiction",
