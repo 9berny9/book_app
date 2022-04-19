@@ -6,16 +6,21 @@ def publisher_languages():
 
 def get_language(data, selected_language):
     language_condition = publisher_languages()
-    return data[data.isbn.str.startswith(tuple(language_condition[selected_language]), na=False)]
+    language_condition = data[data.isbn.str.startswith(
+        tuple(language_condition[selected_language]), na=False)]
+    return language_condition
 
 
 def get_genres():
-    genres_list = ["Art", "Business", "Chick-Lit", "Children's", "Christian", "Classics", "Comendy",
-                   "Comics", "Contemporary", "Cookbooks", "Crime", "Ebooks", "Fantasy", "Fiction", "Graphic Novels",
-                   "Historical Fiction", "History", "Horror", "LGBT", "Manga", "Memoir", "Music", "Mystery",
-                   "Nonfiction", "Paranormal", "Philosophy", "Poetry", "Psychology", "Religion", "Romance", "Science",
-                   "Science Fiction", "Self Help", "Suspense", "Spirituality", "Sports", "Thriller", "Travel",
-                   "Young Adult"]
+    genres_list = ["Art", "Business", "Chick-Lit", "Children's", "Christian",
+                   "Classics", "Comendy", "Comics", "Contemporary",
+                   "Cookbooks", "Crime", "Ebooks", "Fantasy", "Fiction",
+                   "Graphic Novels", "Historical Fiction", "History", "Horror",
+                   "LGBT", "Manga", "Memoir", "Music", "Mystery", "Nonfiction",
+                   "Paranormal", "Philosophy", "Poetry", "Psychology",
+                   "Religion", "Romance", "Science", "Science Fiction",
+                   "Self Help", "Suspense", "Spirituality",
+                   "Sports", "Thriller", "Travel", "Young Adult"]
     return genres_list
 
 

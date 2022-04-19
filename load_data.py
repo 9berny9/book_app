@@ -23,7 +23,8 @@ def load_data(path: str):
     if path == RATING_PATH:
         data = data[data["Book-Rating"] != 0]
         # only books with multiple user ratings
-        data = data[data.groupby('ISBN')['ISBN'].transform('size') >= RATING_AMOUNTS]
+        data = data[data.groupby('ISBN')['ISBN'].transform('size')
+                    >= RATING_AMOUNTS]
     return data
 
 
@@ -35,7 +36,8 @@ def merged_dataset(ratings_base: DataFrame, books_base: DataFrame):
     df = pd.merge(ratings_base, books_base, on=["ISBN"])
 
     # only needed columns
-    df = df[["User-ID", "ISBN", "Book-Rating", "Book-Title", "Book-Author", "Image-URL-M"]]
+    df = df[["User-ID", "ISBN", "Book-Rating", "Book-Title", "Book-Author",
+             "Image-URL-M"]]
 
     # rename columns
     df = df.rename(columns={
@@ -49,7 +51,9 @@ def lowercase_dataset(merged_data: DataFrame):
     """
     Converts whole dataset to lowercase.
     """
-    return merged_data.apply(lambda x: x.str.lower() if x.dtype == 'object' else x)
+    df = merged_data.apply(
+        lambda x: x.str.lower() if x.dtype == 'object' else x)
+    return df
 
 
 books = load_data(BOOKS_PATH)

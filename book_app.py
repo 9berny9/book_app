@@ -5,30 +5,38 @@ import scraper
 import functions as f
 from PIL import Image
 from book_rec import recommender
-from load_data import books, ratings, dataset, dataset_lowercase, NUMBER_OF_RECOMMENDATIONS
+from load_data import books, ratings, dataset, dataset_lowercase,\
+    NUMBER_OF_RECOMMENDATIONS
 
 
 # prejmenovat
-def main():
+def run_app():
     read_style()
     header()
     user_name = st.text_input("Enter your name:")
 
     # dat do funkce
     if user_name:
-        select_genres = st.multiselect("Select your favorite genres:", f.get_genres())
+        select_genres = st.multiselect("Select your favorite genres:",
+                                       f.get_genres())
         if select_genres:
-            publisher_language = st.selectbox("Select publisher's language:", f.publisher_languages().keys())
+            publisher_language = st.selectbox("Select publisher's language:",
+                                              f.publisher_languages().keys())
             if publisher_language:
                 book_author = st.text_input("Select author's last name:")
                 books_language = f.get_language(dataset, publisher_language)
 
                 if book_author:
-                    book_title = st.selectbox(f"Select book's name:", get_books(books_language, book_author))
+                    book_title = st.selectbox(f"Select book's name:",
+                                              get_books(books_language,
+                                                        book_author))
                     check1, check2, check3 = st.columns(3)
-                    description_box = check1.checkbox("Book description", value=False)
-                    best_box = check2.checkbox("Best recommendations", value=False)
-                    worst_box = check3.checkbox("Worst recommendations", value=False)
+                    description_box = check1.checkbox("Book description",
+                                                      value=False)
+                    best_box = check2.checkbox("Best recommendations",
+                                               value=False)
+                    worst_box = check3.checkbox("Worst recommendations",
+                                                value=False)
                     # volat jenom jednou br main do promenne
                     if not recommender(book_title.lower(), book_author.lower()):
                         if description_box:
@@ -65,9 +73,12 @@ def header():
     st.image("book_logo.png", width=300)
     # create three columns abreast
     col1, col2, col3 = st.columns(3)
-    col1.metric(label="Number of Users", value=f"{len(ratings.groupby('User-ID'))}")
-    col2.metric(label="Number of Books", value=f"{len(books['ISBN'])}")
-    col3.metric(label="Number of Ratings", value=f"{len(ratings['Book-Rating'])}")
+    col1.metric(label="Number of Users",
+                value=f"{len(ratings.groupby('User-ID'))}")
+    col2.metric(label="Number of Books",
+                value=f"{len(books['ISBN'])}")
+    col3.metric(label="Number of Ratings",
+                value=f"{len(ratings['Book-Rating'])}")
 
 
 def book_rec_img(book_corr, column, column_number, number):
@@ -116,17 +127,16 @@ def book_description(title):
 
 @st.cache(allow_output_mutation=True)
 def get_books(dataset_language, searched_author):
-    # pep 8 ma 80 znaku
     books_finding = dataset_language[
         dataset_language.author.str.contains(
-            searched_author.lower(), case=False, na=True, flags=re.IGNORECASE, regex=False)]
-    books_finding = books_finding.groupby("title").count().sort_values("id", ascending=False).reset_index()
+            searched_author.lower(), case=False, na=True, flags=re.IGNORECASE,
+            regex=False)]
+    books_finding = books_finding.groupby("title").count().\
+        sort_values("id", ascending=False).reset_index()
     return books_finding.title
-
-
 
 
 # dat do zvlast souboru na spusteni
 
 if __name__ == "__main__":
-    main()
+    run_app()
