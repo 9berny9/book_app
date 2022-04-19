@@ -76,17 +76,17 @@ def book_rec_img(data_merge, book_corr, column, column_number, number):
 
 def recommendation(book_corr, data_merge):
     idx = 0
-    for i in range(len(book_list_corr) - 1):
+    for i in range(len(book_corr) - 1):
         cols = st.columns(3)
 
-        if idx < len(book_list_corr) - 1:
+        if idx < len(book_corr) - 1:
             book_rec_img(data_merge, book_corr, cols, idx, 0)
         idx += 1
 
-        if idx < len(book_list_corr) - 1:
+        if idx < len(book_corr) - 1:
             book_rec_img(data_merge, book_corr, cols, idx, 1)
         idx += 1
-        if idx < len(book_list_corr) - 1:
+        if idx < len(book_corr) - 1:
             book_rec_img(data_merge, book_corr, cols, idx, 2)
             idx = idx + 1
         else:
