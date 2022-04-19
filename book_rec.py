@@ -84,7 +84,14 @@ def correlation_by_book(dataset_of_other_books, dataset_for_corr, book, ratings_
     return corr_fellowship
 
 
+def merge_data():
+    ratings = pd.read_csv('csv_files/BX-Book-Ratings.csv', encoding='cp1251', sep=';', on_bad_lines='skip', low_memory=False)
+    ratings = ratings[ratings['Book-Rating'] != 0]
+    books = pd.read_csv('csv_files/BX-Books.csv', encoding='cp1251', sep=';', on_bad_lines='skip', low_memory=False)
+    return pd.merge(ratings, books, on=['ISBN'])
 
 
-
-
+if __name__ == "__main__":
+    dataset = merge_data()
+    result = main(dataset, "the fellowship of the ring (the lord of the rings, part 1)", "tolkien")
+    print(result[0].head(10))
