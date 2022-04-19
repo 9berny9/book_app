@@ -23,10 +23,10 @@ def run_app():
         best_box = check2.checkbox("Best recommendations", value=False)
         worst_box = check3.checkbox("Worst recommendations", value=False)
         # final dataset with corr
-        all_recommendations = recommender(title.lower(), author.lower())
+        df_corr = recommender(title.lower(), author.lower())
         # create boxes
         get_description(description_box, title)
-        get_rec(all_recommendations, best_box, worst_box)
+        get_rec(df_corr, best_box, worst_box)
 
 
 def read_style():
@@ -63,7 +63,7 @@ def language_select(selected_genres):
 
 def language_dataframe(selected_language):
     if selected_language:
-        df_language = get_language(dataset, selected_language)
+        df_language = get_language(selected_language)
         return df_language
 
 
@@ -80,10 +80,35 @@ def title_select(selected_author, df):
         return title
 
 
+def get_books(dataset_language, searched_author):
+    books_finding = dataset_language[
+        dataset_language.author.str.contains(
+            searched_author.lower(), case=False, na=True, flags=re.IGNORECASE,
+            regex=False)]
+    books_finding = books_finding.groupby("title").count().sort_values(
+        "id", ascending=False).reset_index()
+    return books_finding.title
+
+
 def get_description(box, book_title):
     if box:
         st.markdown("#### Book description:")
         book_description(book_title)
+
+
+def book_description(title):
+    url_img = get_book_column(title, "image")
+    author = get_book_column(title, column="author")
+    book_cover = Image.open(requests.get(url_img, stream=True).raw)
+    col1, col2 = st.columns((1, 2.5))
+    col1.image(book_cover, width=170)
+    col2.write(f"<b>{title}</b>", unsafe_allow_html=True)
+    col2.write(f"<b>{author}</b>", unsafe_allow_html=True)
+    col2.write(
+        f"<b>{round(get_rating(title.lower()), 1)}/10</b>",
+        unsafe_allow_html=True)
+    soup_for_book = scraper.get_soup_book(title)
+    col2.write(scraper.get_description(soup_for_book))
 
 
 def get_rec(corr_dataset, best_box, worst_box):
@@ -103,61 +128,47 @@ def get_rec(corr_dataset, best_box, worst_box):
             rec_images(worst_corr)
 
 
-def book_rec_img(book_corr, column, column_number, number):
-    book_corr_data = get_dataset_for_corr(dataset, book_corr[column_number])
-    book_corr_name = book_corr_data.title
-    book_corr_author = book_corr_data.author
-    url_img = get_book_column(dataset, book_corr_name, column='image')
-    book_cover = Image.open(requests.get(url_img, stream=True).raw)
-    column[number].image(book_cover, width=170,
-                         caption=f"{book_corr_name} by {book_corr_author}")
-
-
 def rec_images(book_corr):
-    # a pouzit enumerate misto indexu
-    idx = 0
-    for i in range(len(book_corr) - 1):
-        cols = st.columns(3)
-
-        # pouzit pouze jeden if a hodit do for cyklu
-        if idx < len(book_corr) - 1:
-            book_rec_img(book_corr, cols, idx, 0)
-        idx += 1
-
-        if idx < len(book_corr) - 1:
-            book_rec_img(book_corr, cols, idx, 1)
-        idx += 1
-        if idx < len(book_corr) - 1:
-            book_rec_img(book_corr, cols, idx, 2)
-            idx = idx + 1
+    cols = st.columns(3)
+    for i in range(3):
+        if i == 0:
+            check_list = [0, 3, 6]
+        elif i == 1:
+            check_list = [1, 4, 7]
         else:
-            break
+            check_list = [2, 5, 8]
+
+        for index, value in enumerate(book_corr):
+            if index in check_list:
+                df_corr = get_corr_df(value)
+                cols[i].image(get_corr_img(df_corr), width=170)
+                cols[i].write(f"<b>{df_corr.title}</b>", unsafe_allow_html=True)
+                cols[i].write(f"by {df_corr.author}")
 
 
-def book_description(title):
-    url_img = get_book_column(dataset, title, "image")
-    author = get_book_column(dataset, title, column="author")
-    book_cover = Image.open(requests.get(url_img, stream=True).raw)
-    col1, col2 = st.columns((1, 2.5))
-    col1.image(book_cover, width=170)
-    col2.write(f"<b>{title}</b>", unsafe_allow_html=True)
-    col2.write(f"<b>{author}</b>", unsafe_allow_html=True)
-    col2.write(
-        f"<b>{round(get_book_rating(dataset_lowercase, title.lower()), 1)}/10</b>",
-        unsafe_allow_html=True)
-    soup_for_book = scraper.get_soup_book(title)
-    col2.write(scraper.get_description(soup_for_book))
+def get_corr_df(title):
+    book_corr_data = get_book_frame(dataset, title)
+    return book_corr_data
 
 
-@st.cache(allow_output_mutation=True)
-def get_books(dataset_language, searched_author):
-    books_finding = dataset_language[
-        dataset_language.author.str.contains(
-            searched_author.lower(), case=False, na=True, flags=re.IGNORECASE,
-            regex=False)]
-    books_finding = books_finding.groupby("title").count(). \
-        sort_values("id", ascending=False).reset_index()
-    return books_finding.title
+def get_book_frame(data_base, book_name):
+    url_img = data_base[data_base.title.str.lower() == book_name].iloc[0]
+    return url_img
+
+
+def get_corr_img(df_corr):
+    return Image.open(requests.get(df_corr.image, stream=True).raw)
+
+
+def get_book_column(title, column):
+    book_data = dataset[dataset.title == title]
+    return book_data[column].iloc[0]
+
+
+def get_rating(title):
+    book_data = dataset_lowercase[dataset_lowercase.title == title]
+    book_rating = book_data.groupby("title").mean()
+    return book_rating.rating.mean()
 
 
 def publisher_languages():
@@ -167,12 +178,12 @@ def publisher_languages():
     return {"English": ["0", "1"], "French": "2", "German": "3"}
 
 
-def get_language(data, selected_language):
+def get_language(selected_language):
     """
     Function returns  dataset with selected language.
     """
     language_condition = publisher_languages()
-    language_condition = data[data.isbn.str.startswith(
+    language_condition = dataset[dataset.isbn.str.startswith(
         tuple(language_condition[selected_language]), na=False)]
     return language_condition
 
@@ -193,17 +204,6 @@ def get_genres():
     return genres_list
 
 
-def get_dataset_for_corr(data_base, book_name):
-    url_img = data_base[data_base.title.str.lower() == book_name].iloc[0]
-    return url_img
 
 
-def get_book_column(data, title, column):
-    book_data = data[data.title == title]
-    return book_data[column].iloc[0]
 
-
-def get_book_rating(data_low, title):
-    book_data = data_low[data_low.title == title]
-    book_rating = book_data.groupby("title").mean()
-    return book_rating.rating.mean()
