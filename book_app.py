@@ -8,6 +8,51 @@ import pandas as pd
 from PIL import Image
 
 
+def main():
+    books = load_data("csv_files/BX-Books.csv")
+    ratings = load_data("csv_files/BX-Book-Ratings.csv")
+    header(books, ratings)
+    dataset = merge_books(ratings, books)
+    dataset_lowercase = data_lower(dataset)
+    user_name = st.text_input("Enter your name:")
+    if user_name:
+        select_genres = st.multiselect("Select your favorite genres:", f.get_genres())
+        if select_genres:
+            publisher_language = st.selectbox("Select publisher's language:", f.publisher_languages().keys())
+            if publisher_language:
+                book_author = st.text_input("Select author's last name:")
+                books_language = f.get_language(dataset, publisher_language)
+                if book_author:
+                    book_title = st.selectbox(f"Select book's name:", get_books(books_language, book_author))
+                    check1, check2, check3 = st.columns(3)
+                    description_box = check1.checkbox("Book description", value=False)
+                    best_box = check2.checkbox("Best recommendations", value=False)
+                    worst_box = check3.checkbox("Worst recommendations", value=False)
+                    if not br.main(dataset_lowercase, book_title.lower(), book_author.lower()):
+                        if description_box:
+                            st.markdown("#### Book description:")
+                            book_description(book_title, dataset, dataset_lowercase)
+                        if best_box:
+                            st.markdown("#### This book doesn't have enough data!")
+                        if worst_box:
+                            st.markdown("#### This book doesn't have enough data!")
+                    else:
+                        result = br.main(dataset_lowercase, book_title.lower(), book_author.lower())
+                        if description_box:
+                            st.markdown("#### Book description:")
+                            book_description(book_title, dataset, dataset_lowercase)
+
+                        if best_box:
+                            st.markdown("#### Best recommendations:")
+                            book_list_corr = result[0]["book"].head(10).to_list()
+                            recommendation(book_list_corr, dataset)
+
+                        if worst_box:
+                            st.markdown("#### Worst recommendations:")
+                            book_list_corr = result[0]["book"].tail(10).to_list()
+                            recommendation(book_list_corr, dataset)
+
+
 def header(data_b, data_r):
     with open("style.css") as f:
         st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
@@ -90,45 +135,4 @@ def data_lower(data):
 
 
 if __name__ == "__main__":
-    books = load_data("csv_files/BX-Books.csv")
-    ratings = load_data("csv_files/BX-Book-Ratings.csv")
-    header(books, ratings)
-    dataset = merge_books(ratings, books)
-    dataset_lowercase = data_lower(dataset)
-    user_name = st.text_input("Enter your name:")
-    if user_name:
-        select_genres = st.multiselect("Select your favorite genres:", f.get_genres())
-        if select_genres:
-            publisher_language = st.selectbox("Select publisher's language:", f.publisher_languages().keys())
-            if publisher_language:
-                book_author = st.text_input("Select author's last name:")
-                books_language = f.get_language(dataset, publisher_language)
-                if book_author:
-                    book_title = st.selectbox(f"Select book's name:", get_books(books_language, book_author))
-                    check1, check2, check3 = st.columns(3)
-                    description_box = check1.checkbox("Book description", value=False)
-                    best_box = check2.checkbox("Best recommendations", value=False)
-                    worst_box = check3.checkbox("Worst recommendations", value=False)
-                    if not br.main(dataset_lowercase, book_title.lower(), book_author.lower()):
-                        if description_box:
-                            st.markdown("#### Book description:")
-                            book_description(book_title, dataset, dataset_lowercase)
-                        if best_box:
-                            st.markdown("#### This book doesn't have enough data!")
-                        if worst_box:
-                            st.markdown("#### This book doesn't have enough data!")
-                    else:
-                        result = br.main(dataset_lowercase, book_title.lower(), book_author.lower())
-                        if description_box:
-                            st.markdown("#### Book description:")
-                            book_description(book_title, dataset, dataset_lowercase)
-
-                        if best_box:
-                            st.markdown("#### Best recommendations:")
-                            book_list_corr = result[0]["book"].head(10).to_list()
-                            recommendation(book_list_corr, dataset)
-
-                        if worst_box:
-                            st.markdown("#### Worst recommendations:")
-                            book_list_corr = result[0]["book"].tail(10).to_list()
-                            recommendation(book_list_corr, dataset)
+    main()
