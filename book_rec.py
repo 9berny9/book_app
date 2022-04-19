@@ -9,10 +9,7 @@ def recommender(book_choice: str, book_author: str):
     books_of_author_readers = dataset_lowercase[
         (dataset_lowercase.id.isin(author_readers))]
     ratings_data_raw = ratings_data(books_of_author_readers)
-    ratings_data_raw_nodup = ratings_nodup(ratings_data_raw)
-    dataset_for_corr = ratings_data_raw_nodup.pivot(index='id',
-                                                    columns='title',
-                                                    values='rating')
+    dataset_for_corr = ratings_nodup(ratings_data_raw)
     result = book_correlations(dataset_for_corr, book_choice)
     return result
 
@@ -48,6 +45,9 @@ def ratings_nodup(ratings_data_raw: DataFrame):
         ['id', 'title']).rating.mean()
     # reset index to see User-ID in every row
     ratings_data_raw_nodup = ratings_data_raw_nodup.to_frame().reset_index()
+    ratings_data_raw_nodup = ratings_data_raw_nodup.pivot(index='id',
+                                                          columns='title',
+                                                          values='rating')
     return ratings_data_raw_nodup
 
 

@@ -37,30 +37,27 @@ def run_app():
                                                value=False)
                     worst_box = check3.checkbox("Worst recommendations",
                                                 value=False)
-                    # volat jenom jednou br main do promenne
-                    if not recommender(book_title.lower(), book_author.lower()):
-                        if description_box:
-                            st.markdown("#### Book description:")
-                            book_description(book_title)
-                        if best_box:
-                            st.markdown("#### This book doesn't have enough data!")
-                        if worst_box:
-                            st.markdown("#### This book doesn't have enough data!")
-                    else:
-                        result = recommender(book_title.lower(), book_author.lower())
-                        if description_box:
-                            st.markdown("#### Book description:")
-                            book_description(book_title)
 
+                    recommended_books = recommender(book_title.lower(),
+                                                    book_author.lower())
+                    if description_box:
+                        st.markdown("#### Book description:")
+                        book_description(book_title)
+                    if len(recommended_books[0]) <= NUMBER_OF_RECOMMENDATIONS:
+                        if best_box or worst_box:
+                            st.markdown(
+                                "#### This book doesn't have enough data!")
+                    else:
                         if best_box:
                             st.markdown("#### Best recommendations:")
-                            # dat do konstanty 10
-                            book_list_corr = result[0]["book"].head(NUMBER_OF_RECOMMENDATIONS).to_list()
+                            book_list_corr = recommended_books[0]["book"].head(
+                                NUMBER_OF_RECOMMENDATIONS).to_list()
                             recommendation(book_list_corr)
 
                         if worst_box:
                             st.markdown("#### Worst recommendations:")
-                            book_list_corr = result[0]["book"].tail(NUMBER_OF_RECOMMENDATIONS).to_list()
+                            book_list_corr = recommended_books[0]["book"].tail(
+                                NUMBER_OF_RECOMMENDATIONS).to_list()
                             recommendation(book_list_corr)
 
 
@@ -85,7 +82,7 @@ def book_rec_img(book_corr, column, column_number, number):
     book_corr_data = f.get_dataset_for_corr(dataset, book_corr[column_number])
     book_corr_name = book_corr_data.title
     book_corr_author = book_corr_data.author
-    url_img = f.get_book_img(dataset, book_corr_name)
+    url_img = f.get_book_column(dataset, book_corr_name, column='image')
     book_cover = Image.open(requests.get(url_img, stream=True).raw)
     column[number].image(book_cover, width=170,
                          caption=f"{book_corr_name} by {book_corr_author}")
@@ -113,8 +110,8 @@ def recommendation(book_corr):
 
 
 def book_description(title):
-    url_img = f.get_book_img(dataset, title)
-    author = f.get_book_author(dataset, title)
+    url_img = f.get_book_column(dataset, title, "image")
+    author = f.get_book_column(dataset, title, column="author")
     book_cover = Image.open(requests.get(url_img, stream=True).raw)
     col1, col2 = st.columns((1, 2.5))
     col1.image(book_cover, width=170)

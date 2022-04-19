@@ -29,17 +29,12 @@ def get_dataset_for_corr(data_base, book_name):
     return url_img
 
 
-def get_book_author(data, title):
+def get_book_column(data, title, column):
     book_data = data[data.title == title]
-    return book_data.author.iloc[0]
-
-
-def get_book_img(data, title):
-    book_data = data[data["Book-Title"] == title]
-    return book_data["Image-URL-L"].iloc[0]
+    return book_data[column].iloc[0]
 
 
 def get_book_rating(data_low, title):
-    book_data = data_low[data_low["Book-Title"] == title]
-    book_rating = book_data.groupby("Book-Title").mean()
-    return book_rating["Book-Rating"].mean()
+    book_data = data_low[data_low.title == title]
+    book_rating = book_data.groupby("title").mean()
+    return book_rating.rating.mean()
