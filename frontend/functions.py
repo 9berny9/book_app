@@ -3,7 +3,26 @@ import re
 import streamlit as st
 from backend import scraper
 from PIL import Image
-from backend.load_data import dataset, dataset_lowercase
+from pandas import DataFrame
+from backend.load_data import dataset, dataset_lowercase,\
+    NUMBER_OF_RECOMMENDATIONS
+
+
+def get_rec(corr_dataset, best_box, worst_box):
+    best_corr = corr_dataset.book.head(NUMBER_OF_RECOMMENDATIONS)
+    worst_corr = corr_dataset.book.tail(NUMBER_OF_RECOMMENDATIONS)
+
+    if len(corr_dataset) <= NUMBER_OF_RECOMMENDATIONS:
+        if best_box or worst_box:
+            st.markdown("#### This book doesn't have enough data!")
+    else:
+        if best_box:
+            st.markdown("#### Best recommendations:")
+            rec_images(best_corr)
+
+        if worst_box:
+            st.markdown("#### Worst recommendations:")
+            rec_images(worst_corr)
 
 
 def get_books(dataset_language, searched_author):
@@ -29,6 +48,12 @@ def book_description(title):
         unsafe_allow_html=True)
     soup_for_book = scraper.get_soup_book(title)
     col2.write(scraper.get_description(soup_for_book))
+
+
+def get_description(box, book_title):
+    if box:
+        st.markdown("#### Book description:")
+        book_description(book_title)
 
 
 def rec_images(book_corr):
