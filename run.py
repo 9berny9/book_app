@@ -1,4 +1,4 @@
-from book_app import run_app
+from frontend.book_app import run_app
 
 
 if __name__ == "__main__":

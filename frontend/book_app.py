@@ -30,12 +30,12 @@ def run_app():
 
 
 def read_style():
-    with open("src/style.css") as file:
+    with open("frontend/src/style.css") as file:
         st.markdown(f"<style>{file.read()}</style>", unsafe_allow_html=True)
 
 
 def header():
-    st.image("src/book_logo.png", width=300)
+    st.image("frontend/src/book_logo.png", width=300)
     # create three columns abreast
     col1, col2, col3 = st.columns(3)
     col1.metric(label="Number of Users",
