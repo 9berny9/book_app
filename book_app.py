@@ -1,10 +1,10 @@
 import streamlit as st
 import requests
 import re
-import scraper
+from backend import scraper
 from PIL import Image
-from book_rec import recommender
-from load_data import books, ratings, dataset, dataset_lowercase, \
+from backend.book_rec import recommender
+from backend.load_data import books, ratings, dataset, dataset_lowercase, \
     NUMBER_OF_RECOMMENDATIONS
 
 
@@ -30,12 +30,12 @@ def run_app():
 
 
 def read_style():
-    with open("style.css") as file:
+    with open("src/style.css") as file:
         st.markdown(f"<style>{file.read()}</style>", unsafe_allow_html=True)
 
 
 def header():
-    st.image("book_logo.png", width=300)
+    st.image("src/book_logo.png", width=300)
     # create three columns abreast
     col1, col2, col3 = st.columns(3)
     col1.metric(label="Number of Users",
@@ -68,7 +68,7 @@ def language_dataframe(selected_language):
 
 
 def author_select(df):
-    if df is not None:
+    if df:
         author = st.text_input("Select author's last name:")
         return author
 

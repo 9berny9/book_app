@@ -1,6 +1,6 @@
 import pandas as pd
 from pandas import DataFrame
-from load_data import RATING_AMOUNTS, dataset_lowercase
+from backend.load_data import RATING_AMOUNTS, dataset_lowercase
 
 
 def recommender(book_choice: str, book_author: str):
