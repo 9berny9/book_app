@@ -1,9 +1,12 @@
 import pandas as pd
-from pandas import DataFrame
+from pandas import DataFrame, Series
 from backend.load_data import RATING_AMOUNTS, dataset_lowercase
 
 
-def recommender(book_choice: str, book_author: str):
+def recommender(book_choice: str, book_author: str) -> DataFrame:
+    """
+    Main function returns correlation dataframe for the selected book.
+    """
     author_readers = users_find(book_choice, book_author)
     # final dataset with users, books and ratings
     books_of_author_readers = dataset_lowercase[
@@ -14,7 +17,7 @@ def recommender(book_choice: str, book_author: str):
     return result
 
 
-def users_find(book_name: str, book_author: str):
+def users_find(book_name: str, book_author: str) -> Series:
     """
     The function returns dataframe of users who have rated author.
     """
@@ -26,7 +29,11 @@ def users_find(book_name: str, book_author: str):
     return author_readers
 
 
-def ratings_data(books_of_author_readers: DataFrame):
+def ratings_data(books_of_author_readers: DataFrame) -> DataFrame:
+    """
+    Function returns dataframe with the user's title rating.
+    Only for higher number of ratings than threshold.
+    """
     # Number of ratings per other books in dataset
     number_of_rating_per_book = books_of_author_readers.groupby(
         ['title']).count().reset_index()
@@ -39,7 +46,11 @@ def ratings_data(books_of_author_readers: DataFrame):
     return ratings_data_raw
 
 
-def ratings_nodup(ratings_data_raw: DataFrame):
+def ratings_nodup(ratings_data_raw: DataFrame) -> DataFrame:
+    """
+    Function returns dataframe where columns are titles, indexes are user id
+    and values are ratings.
+    """
     # group by User and Book and compute mean
     ratings_data_raw_nodup = ratings_data_raw.groupby(
         ['id', 'title']).rating.mean()
@@ -51,7 +62,11 @@ def ratings_nodup(ratings_data_raw: DataFrame):
     return ratings_data_raw_nodup
 
 
-def book_correlations(dataset_for_corr: DataFrame, book: str):
+def book_correlations(dataset_for_corr: DataFrame, book: str) -> DataFrame:
+    """
+    Function returns dataframe for all correlations without selected book.
+    Dataframe is sorted from the highest correlation.
+    """
     recommended_books = []
     # corr computation
     for book_title in dataset_for_corr.columns.values:
@@ -62,5 +77,5 @@ def book_correlations(dataset_for_corr: DataFrame, book: str):
     # final dataframe of all correlation for book
     correlations = pd.DataFrame(recommended_books,
                                 columns=['book', 'corr', 'avg_rating'])
-    result_list = correlations.sort_values('corr', ascending=False)
-    return result_list
+    result = correlations.sort_values('corr', ascending=False)
+    return result
