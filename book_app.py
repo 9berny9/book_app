@@ -68,7 +68,7 @@ def language_dataframe(selected_language):
 
 
 def author_select(df):
-    if df:
+    if df is not None:
         author = st.text_input("Select author's last name:")
         return author
 
