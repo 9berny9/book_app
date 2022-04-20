@@ -142,8 +142,8 @@ def rec_images(book_corr):
             if index in check_list:
                 df_corr = get_corr_df(value)
                 cols[i].image(get_corr_img(df_corr), width=170)
-                cols[i].write(f"<b>{df_corr.title}</b>", unsafe_allow_html=True)
-                cols[i].write(f"by {df_corr.author}")
+                cols[i].write(f"""<p><b>{df_corr.title}</b></p> 
+                <p>{df_corr.author}</p>""", unsafe_allow_html=True)
 
 
 def get_corr_df(title):
