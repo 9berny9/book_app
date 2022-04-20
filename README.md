@@ -27,6 +27,8 @@ Runs your app. At any time you can stop the server with Ctrl+c.
 streamlit run run.py
 ```  
 ## Preview app
-![1](readme_img/show.jpg)
-![2](readme_img/show2.jpg)
-![3](readme_img/show3.jpg)
+<img src="readme_img/show.jpg" width="450">
+
+<img src="readme_img/show2.jpg" width="450">
+
+<img src="readme_img/show3.jpg" width="450">
