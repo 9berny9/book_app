@@ -76,7 +76,6 @@ def get_rating(title: str):
     """
     book_data = dataset_lowercase[dataset_lowercase.title == title]
     book_rating = book_data.groupby("title").mean()
-    print(type(book_rating.rating.mean()))
     return book_rating.rating.mean()
 
 
