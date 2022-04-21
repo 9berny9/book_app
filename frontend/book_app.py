@@ -1,6 +1,6 @@
 from frontend.functions import *
 from backend.book_rec import recommender
-from backend.load_data import books, ratings
+from backend.load_data import books, ratings, NUMBER_OF_RECOMMENDATIONS
 
 
 def run_app():
@@ -107,3 +107,37 @@ def description_corr(title: str, author: str):
         get_rec(df_corr, best_box, worst_box)
 
 
+def get_rec(corr_dataset, best_box, worst_box):
+    best_corr = corr_dataset.book.head(NUMBER_OF_RECOMMENDATIONS)
+    worst_corr = corr_dataset.book.tail(NUMBER_OF_RECOMMENDATIONS)
+
+    if len(corr_dataset) <= NUMBER_OF_RECOMMENDATIONS:
+        if best_box or worst_box:
+            st.markdown("#### This book doesn't have enough data!")
+    else:
+        if best_box:
+            st.markdown("#### Best recommendations:")
+            rec_images(best_corr)
+
+        if worst_box:
+            st.markdown("#### Worst recommendations:")
+            rec_images(worst_corr)
+
+
+def rec_images(book_corr):
+    cols = st.columns(3)
+    for i in range(3):
+        if i == 0:
+            check_list = [0, 3, 6]
+        elif i == 1:
+            check_list = [1, 4, 7]
+        else:
+            check_list = [2, 5, 8]
+
+        for index, value in enumerate(book_corr):
+            if index in check_list:
+                df_corr = get_corr_df(value)
+                cols[i].image(get_corr_img(df_corr), width=170)
+                cols[i].write(f"""<p><b>{df_corr.title}</b></p> 
+                                <p>{df_corr.author}</p>""",
+                              unsafe_allow_html=True)
