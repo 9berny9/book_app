@@ -107,7 +107,11 @@ def description_corr(title: str, author: str):
         get_rec(df_corr, best_box, worst_box)
 
 
-def get_rec(corr_dataset, best_box, worst_box):
+def get_rec(corr_dataset: DataFrame, best_box: bool, worst_box: bool):
+    """
+    Function creates the 10 best and worst books
+    and calls image creation function.
+    """
     best_corr = corr_dataset.book.head(NUMBER_OF_RECOMMENDATIONS)
     worst_corr = corr_dataset.book.tail(NUMBER_OF_RECOMMENDATIONS)
 
@@ -124,7 +128,10 @@ def get_rec(corr_dataset, best_box, worst_box):
             rec_images(worst_corr)
 
 
-def rec_images(book_corr):
+def rec_images(book_corr: Series):
+    """
+    Function adds the book description and image to the three columns.
+    """
     cols = st.columns(3)
     for i in range(3):
         if i == 0:

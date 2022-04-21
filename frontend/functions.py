@@ -3,11 +3,14 @@ import re
 import streamlit as st
 from backend import scraper
 from PIL import Image
-from pandas import DataFrame
+from pandas import DataFrame, Series
 from backend.load_data import dataset, dataset_lowercase
 
 
-def get_books(dataset_language, searched_author):
+def get_books(dataset_language: DataFrame, searched_author: str) -> Series:
+    """
+    Function returns books titles sorted by most rated.
+    """
     books_finding = dataset_language[
         dataset_language.author.str.contains(
             searched_author.lower(), case=False, na=True, flags=re.IGNORECASE,
@@ -17,7 +20,10 @@ def get_books(dataset_language, searched_author):
     return books_finding.title
 
 
-def book_description(title):
+def book_description(title: str):
+    """
+    Function creates two columns with book image and description from request.
+    """
     url_img = get_book_column(title, "image")
     author = get_book_column(title, column="author")
     book_cover = Image.open(requests.get(url_img, stream=True).raw)
@@ -32,34 +38,45 @@ def book_description(title):
     col2.write(scraper.get_description(soup_for_book))
 
 
-def get_description(box, book_title):
+def get_description(box: bool, book_title: str):
+    """
+    If the checkbox is true, It calls description function.
+    """
     if box:
         st.markdown("#### Book description:")
         book_description(book_title)
 
 
-def get_corr_df(title):
-    book_corr_data = get_book_frame(dataset, title)
+def get_corr_df(title: str) -> Series:
+    """
+    Function returns series for title.
+    """
+    book_corr_data = dataset[dataset.title.str.lower() == title].iloc[0]
     return book_corr_data
 
 
-def get_book_frame(data_base, book_name):
-    url_img = data_base[data_base.title.str.lower() == book_name].iloc[0]
-    return url_img
-
-
-def get_corr_img(df_corr):
+def get_corr_img(df_corr: Series):
+    """
+    Function returns opened image from dataframe.
+    """
     return Image.open(requests.get(df_corr.image, stream=True).raw)
 
 
-def get_book_column(title, column):
+def get_book_column(title: str, column: str) -> str:
+    """
+    Function returns Series for selected column.
+    """
     book_data = dataset[dataset.title == title]
     return book_data[column].iloc[0]
 
 
-def get_rating(title):
+def get_rating(title: str):
+    """
+    Function returns users average rating.
+    """
     book_data = dataset_lowercase[dataset_lowercase.title == title]
     book_rating = book_data.groupby("title").mean()
+    print(type(book_rating.rating.mean()))
     return book_rating.rating.mean()
 
 
@@ -70,9 +87,9 @@ def publisher_languages():
     return {"English": ["0", "1"], "French": "2", "German": "3"}
 
 
-def get_language(selected_language):
+def get_language(selected_language: str) -> DataFrame:
     """
-    Function returns  dataset with selected language.
+    Function returns  dataframe with selected language.
     """
     language_condition = publisher_languages()
     language_condition = dataset[dataset.isbn.str.startswith(
